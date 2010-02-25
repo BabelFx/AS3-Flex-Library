@@ -1,0 +1,12 @@
+Multilanguage (l10n) Injection for Flex 
+
+Integrating IoC concepts with the power of MXML, this library provides a powerful, easy framework for runtime injection of localized resources (strings, bitmaps, skins, etc.) in Flex 2/3/4 views and models.
+Using a single LocalizationMap instance, developers can centralize all mappings of localized resources to specific destinations and usages. Whenever the locale changes, resources are re-injected into specified destinations.
+
+Please review the WIKI docs and blogs at http://www.gridlinked.info for details and tutorials.
+
+This GIT repository contains the both: 
+
+   1) the source code for the l10nInjection.swc flex library, and 
+   2) the FlashBuilder 4 Flex library project settings  
+

@@ -55,7 +55,7 @@ package com.asfusion.mate.l10n.injectors
 			this.bundleName  = bundleName;
 			this.key         = key;
 
-			this.target      = target;
+			this._target     = target;
 			this.property    = property;
 			this.state       = state;
 			

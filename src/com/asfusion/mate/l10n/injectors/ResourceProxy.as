@@ -96,7 +96,7 @@ package com.asfusion.mate.l10n.injectors
 										parameters	:Array =null, 
 										bundleName	:String="") {
 											
-			super(target,key,property,"", type,parameters,bundleName);
+			super(target,key,property,state, type,parameters,bundleName);
 			_evtDispatcher = new EventDispatcher(this);
 		}
 
@@ -113,7 +113,7 @@ package com.asfusion.mate.l10n.injectors
         public function removeEventListener( type:String,
                                             listener:Function,
                                             useCapture:Boolean = false ):void	{	_evtDispatcher.removeEventListener( type, listener, useCapture );																											}
-        public function dispatchEvent( evt:Event ):Boolean						{	return _evtDispatcher.dispatchEvent( evt );																																																	}
+        public function dispatchEvent( evt:Event ):Boolean						{	return _evtDispatcher ? _evtDispatcher.dispatchEvent( evt ) : false;																								}
         public function hasEventListener( type:String ):Boolean					{	return _evtDispatcher.hasEventListener( type );																																													}
         public function willTrigger( type:String ):Boolean 						{	return _evtDispatcher.willTrigger( type );																																																	}
 

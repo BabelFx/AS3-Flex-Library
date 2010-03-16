@@ -30,7 +30,7 @@ package com.asfusion.mate.l10n.injectors
 	 * @author thomasburleson
 	 * 
 	 */
-	internal class ResourceMap {
+	internal class ResourceMap implements ITargetInjectable {
 		public var bundleName  : String = "";
 		public var key 		   : String = "";	// must be unique for any ResourceInjector
 

@@ -19,8 +19,6 @@ Author: Thomas Burleson, Principal Architect
 */
 package com.asfusion.mate.l10n.injectors
 {
-	 import com.asfusion.mate.injectors.ITargetInjectable;
-	 import com.asfusion.mate.injectors.PropertyInjector;
 	 import com.asfusion.mate.l10n.maps.LocaleMap;
 	 import com.asfusion.mate.l10n.maps.LocaleMapEvent;
 	 
@@ -196,7 +194,7 @@ package com.asfusion.mate.l10n.injectors
 		 			// Listen for changes to "target" so "callbacks" will trigger updates to  with localization values.
 		 			_smartCache.push(it);
 		 			if (it is ResourceProxy) ResourceProxy(it).addEventListener(PropertyChangeEvent.PROPERTY_CHANGE,onRegistrationChanges,false,0,true);
-		 			if ((it is PropertyInjector) && (PropertyInjector(it).state != "")) {
+		 			if ((it is PropertyProxy) && (PropertyProxy(it).state != "")) {
 		 				_listenForStateChanges = true;
 		 			}
 		 		}

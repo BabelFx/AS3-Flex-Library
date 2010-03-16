@@ -19,8 +19,6 @@ Author: Thomas Burleson, Principal Architect
 */
 package com.asfusion.mate.l10n.injectors
 {
-	import com.asfusion.mate.injectors.*;
-	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;

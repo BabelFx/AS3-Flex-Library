@@ -24,6 +24,8 @@ package com.asfusion.mate.l10n.injectors
 	 
 	 import flash.events.Event;
 	 import flash.events.IEventDispatcher;
+	 import flash.utils.Dictionary;
+	 import flash.utils.getQualifiedClassName;
 	 
 	 import mx.collections.ArrayCollection;
 	 import mx.events.PropertyChangeEvent;
@@ -140,6 +142,7 @@ package com.asfusion.mate.l10n.injectors
 		
 		/**
 		 * Clear reference use of specified target "instance" or all _instances
+		 * Or ask ResourceInjector superclass to release references to ResourceMap
 		 * @param target
 		 * 
 		 */
@@ -149,7 +152,7 @@ package com.asfusion.mate.l10n.injectors
 			if (target == null) {
 				_instances = [];
 				clearProxyTargets();
-			} else {
+			} else if ((target is ResourceMap) != true) {
 				// Splice remove the specified target instance
 				var buffer : Array = [];
 				for each (var it:Object in _instances) {
@@ -191,12 +194,18 @@ package com.asfusion.mate.l10n.injectors
 		 		if (it == null) continue;
 		 		
 		 		if (wantsInjection(it) == true) {
-		 			// Listen for changes to "target" so "callbacks" will trigger updates to  with localization values.
+					registerProxyTarget(it);
+					
+					// Listen for changes to "target" so "callbacks" will trigger updates to  with localization values.
 		 			_smartCache.push(it);
-		 			if (it is ResourceProxy) ResourceProxy(it).addEventListener(PropertyChangeEvent.PROPERTY_CHANGE,onRegistrationChanges,false,0,true);
-		 			if ((it is PropertyProxy) && (PropertyProxy(it).state != "")) {
-		 				_listenForStateChanges = true;
-		 			}
+					
+		 			if (it is ResourceProxy) {
+						ResourceProxy(it).addEventListener(PropertyChangeEvent.PROPERTY_CHANGE,onRegistrationChanges,false,0,true);	
+					}
+					else if (it is PropertyProxy) {
+						PropertyProxy(it).owner = this;
+						if (PropertyProxy(it).state != "")  _listenForStateChanges = true;
+					} 
 		 		}
 		 		else {
 		 			hasTargets.push(it);
@@ -219,9 +228,14 @@ package com.asfusion.mate.l10n.injectors
 			for each ( var it:Object in items) {
 				for each (var proxy:ITargetInjectable in _smartCache) {
 					if (proxy == null) continue;
+					
+					var clazz : Class = (proxy.target as Class);
 
-					// Assignment of target, fires injectors to perform injection...
+					// Assignment of target actually fires injectors to perform injection...
+					// Restore individual Class targets...
+					
 					proxy.target = it;
+					if (clazz != null) proxy.target = clazz;
 				}				
 			}
 			
@@ -245,8 +259,10 @@ package com.asfusion.mate.l10n.injectors
 			
 			// If this Injector instance still has a target AND 
 			// the instance is a derivative of the target Class
-			if (target && inst && (inst is target)) { 
-					
+			if (shouldCacheInstance(inst) == true) {
+				
+				trace("adding smartcache: " + inst["id"]);
+				
 				// For current instance, iteration proxies and update target property
 				_instances.push(inst);
 				validateNow(inst);
@@ -278,13 +294,13 @@ package com.asfusion.mate.l10n.injectors
 	   	  * 
 	   	  */
 	   	override protected function onLocaleChange(event:Event=null):void {
-	   	 	// Update standard ResourceMap entrys, then iterate all
-	   	 	// instances of target Class and force updates of all _smartCache proxies...
-	   	 	super.onLocaleChange(event);	   	 	
-
-	   	 	clearProxyTargets();	// Force updates to all proxies
+	   	 	// Update instances of target Class and force updates of all _smartCache proxies...
+	   	 	// Then iterate standard ResourceMap entrys
+			clearProxyTargets();	// Force updates to all proxies
 	   	 	validateNow();
-	   	 }		
+
+			super.onLocaleChange(event);	   	 	
+		}		
 
 	    /**
 	     * The target OR the parameterized values for a registry item has changed... therefore we must 
@@ -295,14 +311,28 @@ package com.asfusion.mate.l10n.injectors
 	    override protected function onRegistrationChanges(event:PropertyChangeEvent):void {
 	    	var rProxy : ResourceProxy = event.target as ResourceProxy;
 			if (rProxy != null) {
-	    	
-		    	if (rProxy.bundleName == "") rProxy.bundleName = this.bundleName;
-
-	    		switch(event.property) {
-	    			case "target" :	assignResourceValuesTo(rProxy);		break;
-	    			default       : validateNow();						break;	// Call to force iteration over all instances 
-	    		}
-			 	
+				// If the proxy just was assigned a target value that is a Class
+				// reference, then do something special...
+				
+				if ( isProxyTargetClass(rProxy) && (event.oldValue == null) ){
+					
+						// Foree release and re-add with new Class reference...
+						release(rProxy);
+						buildRegistry(rProxy);
+					
+				} else {				
+	
+					// Use Injector bundle name if not overridden in proxy
+			    	if (rProxy.bundleName == "") rProxy.bundleName = this.bundleName;
+	
+		    		switch(event.property) {
+		    			case "target" :	assignResourceValuesTo(rProxy);		
+										break;
+						
+		    			default       : validateNow();						
+										break;	// Call to force iteration over all instances 
+		    		}
+				}
 			}
 	    }
 	    
@@ -314,8 +344,10 @@ package com.asfusion.mate.l10n.injectors
 	    private function clearProxyTargets():void {
 	    	for each (var proxy:ITargetInjectable in _smartCache) {
 	    		if (proxy == null) continue;
-	    		
-	    		proxy.target = null;
+	    		if ((proxy.target != null) && !(proxy.target is Class)) {
+					// Only clear if the target is an "instance"
+	    			proxy.target = null;
+				}
 	    	}
 	    }
 		
@@ -329,9 +361,65 @@ package com.asfusion.mate.l10n.injectors
 		 */
 		private function wantsInjection(it:Object):Boolean {
 			// Must be instance of ResourceProxy WITH no target assigned...
-			return ((it is ITargetInjectable) && (ITargetInjectable(it).target == null));
+			return shouldUseInjectorTarget(it) || isProxyTargetClass(it);
 		} 
+		
+		private function shouldUseInjectorTarget(it:Object):Boolean {
+			// Must be instance of ResourceProxy WITH no target assigned...
+			// So the target attribute in <SmartResourceInjector will be used
+			
+			return ((it is ITargetInjectable) && (ITargetInjectable(it).target == null));
+		}
+		
+		private function isProxyTargetClass(it:Object):Boolean {
+			return ( (it is ITargetInjectable) 				&& 
+					 (ITargetInjectable(it).target !=null) 	&& 
+					 (ITargetInjectable(it).target is Class)
+				   ); 
+		}
+		
+		/**
+		 * This allows <ResourceProxy target="{<Class>}" .../> so the target attribute is used as 
+		 * override for <SmartResourceInjector target="{<Class>}" />
+		 *   
+		 * @param it
+		 */
+		private function registerProxyTarget(it:Object) : void {
+			if (isProxyTargetClass(it) == true) {
+				var clazz : Class = (ITargetInjectable(it).target as Class);
+				map.register(clazz);
+			}
+		}
 	   	
+		
+		private function shouldCacheInstance(inst:Object):Boolean {
+			var results : Boolean = false;
+			
+			if (inst != null) {
+				
+				for each (var proxy:ITargetInjectable in _smartCache) {
+					if (proxy == null) continue;		
+					
+					if (
+						  ((proxy.target == null) && (target is Class)       && (inst is target))       || 
+						  ((proxy.target != null) && (proxy.target is Class) && (inst is Class(proxy.target)))
+					   ){
+						// When targetID is specified, only cache if ID matches 
+						var targetID : String = (proxy is ResourceProxy) ? ResourceProxy(proxy).targetID : 
+												(proxy is PropertyProxy) ? PropertyProxy(proxy).targetID : "";
+
+						results = (targetID == "") 			? true 						:
+						          inst.hasOwnProperty("id")	? (inst['id'] == targetID)	: false;
+					} 
+						  
+					// Exist loop asap!
+					if (results == true) break;
+				}
+			}
+				
+			return results;
+		}
+		
 		// *********************************************************************************
 	    //  Private Attributes
 	    // *********************************************************************************
@@ -340,13 +428,12 @@ package com.asfusion.mate.l10n.injectors
 		  * Registered instances of ResourceProxy where "target" is initially null; which means
 		  * these proxies want runtime injection of target instances from SmartResourceInjector 
 		  */
-		 private var _smartCache      : Array            = [];
+		 private var _smartCache      		: Array            = [];
 	     
-
 		 /**
 		  * Instances of the "target" class 
 		  */
-		 private var _instances       : Array            = [];	
+		 private var _instances       		: Array            = [];	// @FIXME: This needs to be dictionary w/ weak references
 
 	
 		 private var _listenForStateChanges : Boolean    = false;

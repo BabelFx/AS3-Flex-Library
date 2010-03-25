@@ -22,9 +22,11 @@ package com.asfusion.mate.l10n.injectors 
 	import com.asfusion.mate.core.Binder;
 	import com.asfusion.mate.utils.InjectorUtils;
 	
+	import flash.events.IEventDispatcher;
 	import flash.utils.Dictionary;
 	
 	import mx.core.IMXMLObject;
+	import mx.utils.StringUtil;
 
 	/**
 	 * PropertyProxy sets a value from an object (source) to a destination (target). 
@@ -73,7 +75,7 @@ package com.asfusion.mate.l10n.injectors 
 		public function set source(value:Object):void {
 			if (value != _source) {
 				_source = value;
-				validateNow();
+				notifyOwner();
 			}
 		}
 		
@@ -83,7 +85,7 @@ package com.asfusion.mate.l10n.injectors 
 		 * 
 		 * @default null
 		 * */
-		public  var targetID:String = null;
+		public  var targetID:String = "";
 
 		/**
 		 * The name of the property that the injector will set in the target object
@@ -92,6 +94,13 @@ package com.asfusion.mate.l10n.injectors 
 		 * */
 		public  var targetKey:String = "";
 		
+		
+		public function get property():String {
+			return targetKey;
+		}
+		public function set property(val:String):void {
+			targetKey = val;
+		}
 		
 		/**
 		 * An object that contains the data that the injector will use to set the target object
@@ -137,7 +146,6 @@ package com.asfusion.mate.l10n.injectors 
 		}
 		
 		public function initialized(document:Object, id:String):void {
-			this._owner = document;
 			this.id     = id;
 			
 			validateNow();
@@ -154,14 +162,15 @@ package com.asfusion.mate.l10n.injectors 
 			if (!target || !source) 					return;
 			if ((targetKey=="") || (sourceKey==""))		return;
 			
-			if(targetID == null || targetID == String(target["id"])) {
+			if(targetID == "" || targetID == String(target["id"])) {
 				
 				// Resolving property chains is possible [in general] since target::creationComplete() is done.
 				var resolvedTarget : Object = InjectorUtils.resolveEndPoint(target,targetKey);
 				var resolvedKey    : String = InjectorUtils.resolveProperty(targetKey);
 				
-				if ((resolvedTarget != null) && (resolvedKey != "")) {
-					var binder:Binder 	= new Binder( softBinding, scope );
+				if (isReadyForBinder(resolvedTarget,resolvedKey) == true) {					
+					
+					var binder: Binder 	= new Binder( softBinding, scope );
 					var done  : Boolean = binder.bind(scope, resolvedTarget, resolvedKey, source, sourceKey);
 					
 					if ( done == true) {
@@ -169,6 +178,32 @@ package com.asfusion.mate.l10n.injectors 
 						_bindings[target] = binder;
 					}
 				}
+			}
+		}
+		
+		private function isReadyForBinder(resolvedTarget : Object, resolvedKey : String):Boolean {
+			var error   : String  = "";
+
+			if ((resolvedTarget != null) && (resolvedKey != "")) {
+				// Scan for errors, then attach ChangeWatcher to listen for future changes...
+				if (source && source.hasOwnProperty(sourceKey)) {
+					if ( !resolvedTarget.hasOwnProperty(resolvedKey) ) 	error = StringUtil.substitute(ERROR_NOTFOUND_TARGETKEY,[resolvedKey]);
+				} else													error = StringUtil.substitute(ERROR_NOTFOUND_SOURCEKEY,[sourceKey]);
+			}
+			
+			if (error != "") trace(error);
+			
+			return (error == "");
+		}
+			
+	
+		private function notifyOwner():void {
+			if ((target == null) || (target is Class)) {
+				// Ask the SmartResourceInjector to iterate all instances of "target"
+				// and apply to this proxy...
+				if (_owner != null) _owner.validateNow();				
+			} else {
+				this.validateNow();
 			}
 		}
 		
@@ -180,8 +215,24 @@ package com.asfusion.mate.l10n.injectors 
 		
 		private var _source		: Object 	 = null;
 		private var _target		: Object	 = null;
+		private var _owner      : SmartResourceInjector = null;
 		
-		private var _owner      : Object     = null;
+		/**
+		 * Special mutator to cache reference to SmartResourceInjector
+		 * When "this.source" changes, the owner needs to re-validate().
+		 *  
+		 * @param val Owning instance of SmartResourceInjector
+		 * 
+		 */
+		internal function set owner(val : SmartResourceInjector):void {
+			if (val != _owner) {
+				_owner = val;
+				notifyOwner();
+			}
+		}
 		
+		
+		static private const ERROR_NOTFOUND_TARGETKEY : String = "PropertyProxy Error: injection failed. Target key does not exist for '{0}'";
+		static private const ERROR_NOTFOUND_SOURCEKEY : String = "PropertyProxy Error: injection failed. Source key does not exist for '{0}'";
 	}
 }

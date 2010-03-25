@@ -145,8 +145,10 @@ package com.asfusion.mate.l10n.maps
 			if(!targetsRegistered && _targets) {
 				for each( var currentTarget:* in _targets)
 				{
-					var currentType:String = ( currentTarget is Class) ? getQualifiedClassName( currentTarget ) : currentTarget;
-					_dispatcher.addEventListener( currentType, fireEvent, false, 0, true);
+					var currentType:String = ( currentTarget is Class) ? getQualifiedClassName( currentTarget ) : (currentTarget as String);
+					if (currentType && currentType != "") {
+						_dispatcher.addEventListener( currentType, fireEvent, false, 0, true);
+					}
 				}
 				targetsRegistered = true;
 			}

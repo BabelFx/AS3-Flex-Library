@@ -171,6 +171,8 @@ package com.asfusion.mate.l10n.injectors
 							delete _registry[key];
 						} 
 					}
+				} else if (target is ResourceMap) {
+					self::removeItem(target as ResourceMap);
 				}
 			}
 	   	 	else if (target == null) {
@@ -246,6 +248,13 @@ package com.asfusion.mate.l10n.injectors
 	   	 	
 	   	 	return map; 
 	   	 }
+		 
+		 self function removeItem(map:ResourceMap):void {
+	   	 	if (map != null ) {
+				if (map is ResourceProxy) ResourceProxy(map).removeEventListener(PropertyChangeEvent.PROPERTY_CHANGE,onRegistrationChanges);
+				if (findItemByMap(map) == true) delete _registry[map.key];
+			}
+		 }
 	   
 	    // *********************************************************************************
 	    //  Proxy Methods
@@ -277,7 +286,7 @@ package com.asfusion.mate.l10n.injectors
 	   	  * 
 	   	  */
 	   	protected function onLocaleChange(event:Event=null):void {
-	   	 	assignResourceValues();
+			assignResourceValues();
 			dispatchEvent(new Event("localeChange"));
 	   	 }
 	   
@@ -359,8 +368,8 @@ package com.asfusion.mate.l10n.injectors
 	   	  * @param forceAssignments Trigger updates even if the ResourceInjector has not instantiated as a MXML tag.
 	   	  * @private 
 	   	  */
-	   	 private function assignResourceValues(viewState:String=""):void {
-			if (_initialized != true) 	return;
+	   	 private function assignResourceValues(viewState:String=""):Boolean {
+			if (_initialized != true) 	return false;
 			
 			var announceChanges : Boolean = false;
 			
@@ -373,6 +382,8 @@ package com.asfusion.mate.l10n.injectors
 			}
 			
 			if (announceChanges == true) dispatchEvent(new Event(Event.CHANGE));
+			
+			return announceChanges;
 	   	 }	 
 	   	 
 	   	 
@@ -384,10 +395,10 @@ package com.asfusion.mate.l10n.injectors
 	   	  * 
 	   	  */
 	   	 protected function assignResourceValuesTo(map:ResourceMap):void {
-	   	 	var target:Object = map ? map.target : null;
-	   	 	
-   	 	    if (!target || !map) return;
+   	 	    if (!map || !map.target || (map.target is Class)) return;
 							
+	   	 	var target:Object = map.target;
+
 			if (map.bundleName != "") {
 				var ui       : Object = resolveEndPoint(map);
 				var property : String = resolveProperty(map);

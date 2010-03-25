@@ -65,7 +65,7 @@ package com.asfusion.mate.l10n.injectors
 		 		_target = src;
 		 		
 			 	// Register class with LocaleMap, to be notified of creationComplete for instances
-				if (_target && map) map.register(_target);
+				if (_target && map) map.addTarget(_target);
 			}
 		 }
 		 private var _target : Class = null;
@@ -88,7 +88,7 @@ package com.asfusion.mate.l10n.injectors
 		 		_map = src;
 		 		_map.addEventListener(LocaleMapEvent.TARGET_READY,onInstanceCreationComplete,false,2);
 
-				if (_target != null) _map.register(_target);
+				if (_target != null) _map.addTarget(_target);
 			}
 		 }
 	     private var _map             : LocaleMap   = null;
@@ -261,7 +261,7 @@ package com.asfusion.mate.l10n.injectors
 			// the instance is a derivative of the target Class
 			if (shouldCacheInstance(inst) == true) {
 				
-				trace("adding smartcache: " + inst["id"]);
+				// trace("adding smartcache: " + inst["id"]);
 				
 				// For current instance, iteration proxies and update target property
 				_instances.push(inst);
@@ -387,7 +387,7 @@ package com.asfusion.mate.l10n.injectors
 		private function registerProxyTarget(it:Object) : void {
 			if (isProxyTargetClass(it) == true) {
 				var clazz : Class = (ITargetInjectable(it).target as Class);
-				map.register(clazz);
+				map.addTarget(clazz);
 			}
 		}
 	   	

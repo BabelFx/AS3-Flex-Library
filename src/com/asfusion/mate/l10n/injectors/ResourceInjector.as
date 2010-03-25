@@ -425,6 +425,8 @@ package com.asfusion.mate.l10n.injectors
 						default         : logError(map,ERROR_UNKNOWN_DATATYPE);															 break;
 					}
 				}
+			} else {
+				logError(map,ERROR_UNKNOWN_BUNDLE);
 			}
 			
 					function assignKeyValue(val:*):void {
@@ -547,9 +549,10 @@ package com.asfusion.mate.l10n.injectors
 	   	 		case ERROR_UNKNOWN_PROPERTY : details = StringUtil.substitute(errorType, [targetID, map.property, 	map.key													 ]);		break;
 	   	 		case ERROR_UNKNOWN_DATATYPE : details = StringUtil.substitute(errorType, [map.type, map.key, 		targetID, 	map.property]);		break;
 	   	 		case ERROR_UNKNOWN_NODE     : details = StringUtil.substitute(errorType, [targetID, map.property, 	map.key, 	node        ]);	 break;
+				case ERROR_UNKNOWN_BUNDLE   : details = StringUtil.substitute(errorType, [targetID                                          ]);	 break;;
 	   	 	}
 	   	 	
-	   	 	trace ("ResourceInjector Error: " + details);
+	   	 	trace ("ResourceInjector (warning): " + details);
 				
 				function getTargetIdentifier(inst:Object):String {
 					var results : String = (inst != null) ? getQualifiedClassName( inst ) : "<???>";
@@ -567,6 +570,7 @@ package com.asfusion.mate.l10n.injectors
 	     private static const ERROR_UNKNOWN_PROPERTY : String = "{0}['{1}'] is unknown for resource key '{2}'.";
 	     private static const ERROR_UNKNOWN_DATATYPE : String = "Unknown data type {0} when mapping resource key '{1}' to {2}[{3}].";
 	     private static const ERROR_UNKNOWN_NODE     : String = "Unresolved node '{3}' in property {0}[{1}] for resource key '{2}'.";
+		 private static const ERROR_UNKNOWN_BUNDLE   : String = "Unknown or unspecified bundlename for target '{0}'!";
 		 
 	   	 private var _cached          : Object           = null;
 	   	 private var _registry        : Dictionary       = new Dictionary(true);

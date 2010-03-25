@@ -27,13 +27,19 @@ package com.asfusion.mate.l10n.maps
 	import flash.events.IEventDispatcher;
 	import flash.utils.Dictionary;
 	import flash.utils.getQualifiedClassName;
+	
+	import mx.events.FlexEvent;
+	import mx.utils.StringUtil;
 
 	[Event(name='targetReady',type='com.asfusion.mate.l10n.maps.LocaleMapEvent')]
 	
-	public class LocaleMap extends AbstractMap 
-	{
-		//.........................................targets..........................................
-		private var _targets:Array = [];
+	public class LocaleMap extends AbstractMap  {
+		
+
+		// ************************************************************************************************
+		//  Public Properties
+		// ************************************************************************************************
+
 		/**
 		 * An array of classes that, when an object is created, should trigger the <code>InjectorHandlers</code> to run. 
 		 * 
@@ -49,18 +55,25 @@ package com.asfusion.mate.l10n.maps
 			var newValue:Array = (value is Array) ? value as Array :
 			                     (value is Class) ? [value]        : [];
 			
-	        if (oldValue !== newValue)
+			if (!isInitialized) {
+				// Fix to init issue with Flex4 (must preserve all targets)
+				// Only after initialization, does assigning targets CLEAR all
+				// current targets...
+				newValue = targets.concat(newValue);	
+			}
+	        
+			if (oldValue !== newValue)
 	        {
 	        	if(targetsRegistered) unregisterAll();
 	        	
 	        	_targets = newValue;
-	        	validateNow()
+	        	invalidateProperties();
 	        }
 		}
 
-		public function register(target:Class):void {
-			if (!alreadyRegistered(target)) {
-				this.targets = [target].concat(this.targets);
+		public function addTarget(target:Class):void {
+			if (target && !alreadyRegistered(target)) {
+				targets = targets.concat([target]);
 			}
 		}
 		
@@ -77,8 +90,6 @@ package com.asfusion.mate.l10n.maps
 			return results;
 		}
 
-		//.........................................includeDerivatives..........................................
-		private var _includeDerivatives:Boolean = false;
 		/**
 		 * If this property is true, the injector will inject not only the Class in the
 		 * target property, but also all the classes that extend from that class. 
@@ -103,15 +114,38 @@ package com.asfusion.mate.l10n.maps
 		}
 
 
-		/*-.........................................invalidateProperties..........................................*/
-		private var needsInvalidation:Boolean;
+		// ************************************************************************************************
+		//  Validation Methods
+		// ************************************************************************************************
+
+		/**
+		 * @inheritDoc
+		 */ 
+		public function validateNow():void
+		{
+			commitProperties();
+		}
+
+		/**
+		 * Processes the properties set on the component.
+		*/
+		protected function commitProperties():void {
+			var haveTargets : Boolean = (_targets.length > 0);
+
+			if(_dispatcher != null) {
+				registerAll();
+				listenForCreationComplete(haveTargets);
+			}
+		}
+
+		
 		/**
 		*  @inheritDoc
 		*/
 		public function invalidateProperties():void
 		{
 			if( !isInitialized ) needsInvalidation = true;
-			else commitProperties();
+			else				 commitProperties();
 		}
 		
 
@@ -125,80 +159,20 @@ package com.asfusion.mate.l10n.maps
 				needsInvalidation = false;
 			}			
 		}
-
-		/*-.........................................validateNow..........................................*/
-		/**
-		 * @inheritDoc
-		 */ 
-		public function validateNow():void
-		{
-			commitProperties();
-		}
-
-		/**
-		 * Processes the properties set on the component.
-		*/
-		protected function commitProperties():void
-		{
-			if(!_dispatcher) return;
-			
+		
+		// ************************************************************************************************
+		//  Registration Methods
+		// ************************************************************************************************
+		
+		protected  function registerAll():void {
 			if(!targetsRegistered && _targets) {
-				for each( var currentTarget:* in _targets)
-				{
-					var currentType:String = ( currentTarget is Class) ? getQualifiedClassName( currentTarget ) : (currentTarget as String);
-					if (currentType && currentType != "") {
-						_dispatcher.addEventListener( currentType, fireEvent, false, 0, true);
-					}
+				for each (var it:* in _targets) {
+					register(it);
 				}
 				targetsRegistered = true;
 			}
-			
-			if(_targets.length>0) 
-			{
-				addListenerProxy( _dispatcher );
-				if(includeDerivativesChanged)
-				{
-					includeDerivativesChanged = false;
-					if(includeDerivatives)
-					{
-						_dispatcher.addEventListener( InjectorEvent.INJECT_DERIVATIVES, injectDerivativesHandler, false, 0, true);
-					}
-					else
-					{
-						_dispatcher.removeEventListener( InjectorEvent.INJECT_DERIVATIVES, injectDerivativesHandler );
-					}
-				}
-			}
 		}
 
-
-		protected function addListenerProxy(eventDispatcher:IEventDispatcher, type:String = null):ListenerProxy
-		{
-			var listenerProxy:ListenerProxy = _listenerProxies[eventDispatcher];
-			
-			if(listenerProxy == null)
-			{
-				listenerProxy = new ListenerProxy(eventDispatcher);
-				_listenerProxies[eventDispatcher] = listenerProxy;
-			}
-			
-			listenerProxy.addListener((type == null) ? "creationComplete" : type, 
-									  (type == null) ? this 			  : null );
-
-			return listenerProxy;
-		}
-		
-
-		//.........................................fireEvent..........................................
-		/**
-		 * Called by the dispacher when the event gets triggered.
-		 * This method fires an event announcing that a target instance is READY (creationComplete).
-		*/
-		protected function fireEvent(event:InjectorEvent):void {
-			dispatchEvent(new LocaleMapEvent(event.injectorTarget));
-		}
-		
-		//.........................................unregisterAll..........................................
 		/**
 		 * Unregisters a target or targets. Used internally whenever a new target/s is set or _dispatcher changes.
 		*/
@@ -211,48 +185,133 @@ package com.asfusion.mate.l10n.maps
 				for each( var currentTarget:* in _targets)
 				{
 					var currentType:String = ( currentTarget is Class) ? getQualifiedClassName(currentTarget) : currentTarget;
-					_dispatcher.removeEventListener(currentType, fireEvent);
+					_dispatcher.removeEventListener(currentType, onCreationComplete_Target);
+					logDebug("UnRegisters target {0}",[currentType]);
 				}
 				targetsRegistered = false;
 			}
 		}
 		
-		//.........................................injectDerivativesHandler..........................................
+		protected function register(target:*):void {
+			var currentType:String = ( target is Class) ? getQualifiedClassName( target ) : (target as String);
+			
+			if (currentType && currentType != "") {
+				_dispatcher.addEventListener( currentType, onCreationComplete_Target, false, 0, true);
+				logDebug("Registered target {0}",[currentType]);
+			}
+		}
+		
+
+		// ************************************************************************************************
+		//  CreationComplete Listeners Methods
+		// ************************************************************************************************
+		
+		protected function listenForCreationComplete(active:Boolean = true):void {
+
+			if (active == true) addListenerProxy   ( _dispatcher, FlexEvent.CREATION_COMPLETE );
+			else 				removeListenerProxy( _dispatcher, FlexEvent.CREATION_COMPLETE );
+			
+			listenForDerivatives(active);
+		}
+		
+		private function addListenerProxy(eventDispatcher:IEventDispatcher, type:String = null):ListenerProxy {
+			var listenerProxy:ListenerProxy = _listenerProxies[eventDispatcher];
+			
+			if(listenerProxy == null)
+			{
+				listenerProxy = new ListenerProxy(eventDispatcher);
+				_listenerProxies[eventDispatcher] = listenerProxy;
+			}
+			
+			listenerProxy.addListener((type == null) ? "creationComplete" : type, 
+									  (type == null) ? this 			  : null );
+
+			logDebug("LocaleMap: Attaching listenerProxy for creationComplete");
+			
+
+			return listenerProxy;
+		}
+		
+		private function removeListenerProxy(eventDispatcher:IEventDispatcher,type:String):void {
+			var listenerProxy:ListenerProxy = _listenerProxies[eventDispatcher];
+			
+			if(listenerProxy && type && (type != "")) {
+				listenerProxy.removeListener(type);
+				delete _listenerProxies[eventDispatcher];
+				logDebug("LocaleMap: Removing listenerProxy for creationComplete");			
+			}	
+		}
+		
+
+		protected function listenForDerivatives(active:Boolean):void {
+			// Listen for creation of derivative instances of targets...
+			if(includeDerivativesChanged || !active) {
+				includeDerivativesChanged = false;
+				
+				if(includeDerivatives && active) {
+					_dispatcher.addEventListener( InjectorEvent.INJECT_DERIVATIVES, onCreationComplete_Derivative, false, 0, true);
+					logDebug("LocaleMap: Attaching listener for Derivative creationComplete");
+				} else {
+					_dispatcher.removeEventListener( InjectorEvent.INJECT_DERIVATIVES, onCreationComplete_Derivative );
+					logDebug("LocaleMap: Removing listener for Derivative creationComplete");
+				}
+			}						
+		}
+		
+		
+		// ************************************************************************************************
+		//  CreationComplete EventHandlers
+		// ************************************************************************************************
+		
+		/**
+		 * Called by the dispacher when the event gets triggered.
+		 * This method fires an event announcing that a target instance is READY (creationComplete).
+		*/
+		protected function onCreationComplete_Target(event:InjectorEvent):void {
+			dispatchEvent(new LocaleMapEvent(event.injectorTarget));
+			logDebug("LocaleMap: onCreationComplete_Target() for '{0}'",[event.uid]);
+		}
+
 		/**
 		 * This function is a handler for the injection event, if the target it is a 
 		 * derivative class the injection gets triggered
 		 */ 
-		protected function injectDerivativesHandler( event:InjectorEvent ):void
+		protected function onCreationComplete_Derivative( event:InjectorEvent ):void
 		{
-			if( _targets )
-			{
-				for each( var currentTarget:* in _targets)
-				{
-					if( InjectorUtils.isDerivative( event.injectorTarget, currentTarget  ) )
-					{
-						fireEvent( event );
+			if( _targets ) {
+				for each( var currentTarget:* in _targets) {
+					var isDerivative : Boolean = InjectorUtils.isDerivative( event.injectorTarget, currentTarget  );
+					
+					if( isDerivative == true )   {
+						onCreationComplete_Target( event );				
+						
+						logDebug("LocaleMap: onCreationComplete_Derivative() for '{0}'",[event.uid]);
 					}
 				}
 			}
 		}
 		
+		private function logDebug(format:String,params:Array=null):void {
+			//trace(StringUtil.substitute(format,!params ? [] : params));
+		}
+		
+		
+		// ************************************************************************************************
+		//  Private Attributes
+		// ************************************************************************************************
+		
 		 
-		/**
-		 * Flag indicating if this <code>InjectorHandlers</code> is registered to listen to a target list or not.
-		 */
-		protected var targetsRegistered:Boolean;
-		
-		/**
-		 * Flag indicating if the includeDerivatives property has been changed.
-		 */
-		protected var includeDerivativesChanged:Boolean;
+		protected var targetsRegistered			:Boolean = false;
+		protected var includeDerivativesChanged	:Boolean = false;
 
-		/*-.........................................initialized..........................................*/
-		private var isInitialized:Boolean;
+		private var _targets					:Array   = [ ];
+		private var _includeDerivatives			:Boolean = false;
+	
+		private var needsInvalidation			:Boolean = false;
+		private var isInitialized				:Boolean = false;
 		
-
-		private var _dispatcher 	: GlobalDispatcher 	= new GlobalDispatcher();
-		private var _listenerProxies: Dictionary 		= new Dictionary(true);
+		private var _dispatcher 				:GlobalDispatcher 	= new GlobalDispatcher();
+		private var _listenerProxies			:Dictionary 		= new Dictionary(true);
 		
 		private namespace self;
 	}

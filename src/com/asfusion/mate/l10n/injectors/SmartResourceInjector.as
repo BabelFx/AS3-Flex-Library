@@ -53,6 +53,11 @@ package com.asfusion.mate.l10n.injectors
 	  
 	public class SmartResourceInjector extends ResourceInjector {
 		
+		
+		public function get targetInstances():Array {
+			return _instances;
+		}
+		
 		 /**
 		  * Class whose instances should be used to trigger this injector to process and 
 		  * injector resource bundle settings 
@@ -201,6 +206,7 @@ package com.asfusion.mate.l10n.injectors
 					
 		 			if (it is ResourceProxy) {
 						ResourceProxy(it).addEventListener(PropertyChangeEvent.PROPERTY_CHANGE,onRegistrationChanges,false,0,true);	
+						if (ResourceProxy(it).state != "")  _listenForStateChanges = true;
 					}
 					else if (it is PropertyProxy) {
 						PropertyProxy(it).owner = this;
@@ -263,7 +269,7 @@ package com.asfusion.mate.l10n.injectors
 				
 				// trace("adding smartcache: " + inst["id"]);
 				
-				// For current instance, iteration proxies and update target property
+				// For current instance, iterate proxies and update target property
 				_instances.push(inst);
 				validateNow(inst);
 				
@@ -273,6 +279,7 @@ package com.asfusion.mate.l10n.injectors
 						IEventDispatcher(inst).addEventListener(StateChangeEvent.CURRENT_STATE_CHANGE,onTargetStateChange,false,0,true);
 					} 
 				}
+
 			}
 		}	  
 
@@ -396,24 +403,29 @@ package com.asfusion.mate.l10n.injectors
 			var results : Boolean = false;
 			
 			if (inst != null) {
-				
-				for each (var proxy:ITargetInjectable in _smartCache) {
-					if (proxy == null) continue;		
-					
-					if (
-						  ((proxy.target == null) && (target is Class)       && (inst is target))       || 
-						  ((proxy.target != null) && (proxy.target is Class) && (inst is Class(proxy.target)))
-					   ){
-						// When targetID is specified, only cache if ID matches 
-						var targetID : String = (proxy is ResourceProxy) ? ResourceProxy(proxy).targetID : 
-												(proxy is PropertyProxy) ? PropertyProxy(proxy).targetID : "";
-
-						results = (targetID == "") 			? true 						:
-						          inst.hasOwnProperty("id")	? (inst['id'] == targetID)	: false;
-					} 
-						  
-					// Exist loop asap!
-					if (results == true) break;
+				if (_smartCache.length > 0) {
+					for each (var proxy:ITargetInjectable in _smartCache) {
+						if (proxy == null) continue;		
+						
+						if (
+							  ((proxy.target == null) && (target is Class)       && (inst is target))       || 
+							  ((proxy.target != null) && (proxy.target is Class) && (inst is Class(proxy.target)))
+						   ){
+							// When targetID is specified, only cache if ID matches 
+							var targetID : String = (proxy is ResourceProxy) ? ResourceProxy(proxy).targetID : 
+													(proxy is PropertyProxy) ? PropertyProxy(proxy).targetID : "";
+	
+							results = (targetID == "") 			? true 						:
+							          inst.hasOwnProperty("id")	? (inst['id'] == targetID)	: false;
+						} 
+							  
+						// Exist loop asap!
+						if (results == true) break;
+					}
+				} else {
+					// Rare case where no proxies are specified, but a targetClass is still specified...
+					// Useful to trigger localChange events
+					if (target && (target is Class) && (inst is target)) results = true;
 				}
 			}
 				

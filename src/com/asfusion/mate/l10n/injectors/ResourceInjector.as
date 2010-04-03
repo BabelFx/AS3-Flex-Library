@@ -368,7 +368,7 @@ package com.asfusion.mate.l10n.injectors
 	   	  * @param forceAssignments Trigger updates even if the ResourceInjector has not instantiated as a MXML tag.
 	   	  * @private 
 	   	  */
-	   	 private function assignResourceValues(viewState:String=""):Boolean {
+	   	 protected function assignResourceValues(viewState:String=""):Boolean {
 			if (_initialized != true) 	return false;
 			
 			var announceChanges : Boolean = false;
@@ -485,18 +485,15 @@ package com.asfusion.mate.l10n.injectors
 		 private function isValidTargetState(map:ResourceMap):Boolean {
 			 var results 	 : Boolean = true;
 			 var desiredState: String  = map.state;
-					 
+			 
 					 function listenStateChanges(map:ResourceMap):UIComponent {
 						 // If trigger is NOT specified, use parent of target
-						 var ui  : UIComponent      = map.trigger 				? map.trigger as UIComponent  					: 
-							 						  map.target as UIComponent ? UIComponent(map.target).parent as UIComponent : null; 
-						 var src : IEventDispatcher = ui          ? ui as IEventDispatcher      : null;
-						 
-						 if (src && !src.willTrigger(StateChangeEvent.CURRENT_STATE_CHANGE) ) {
-							 src.addEventListener(StateChangeEvent.CURRENT_STATE_CHANGE,onTargetStateChange,false,0,true);
-							 map.trigger = ui;	// update reference to trigger source that announces state changes
-						 } 
-						 
+						 var ui  : UIComponent  = (map.trigger ? map.trigger : map.target) as UIComponent;
+						 if (ui != null) {
+							 if (ui.willTrigger(StateChangeEvent.CURRENT_STATE_CHANGE) != true) {
+							 	ui.addEventListener(StateChangeEvent.CURRENT_STATE_CHANGE, onTargetStateChange,false,0,true);
+							 }
+						 }
 						 return ui;
 					 }
 					 

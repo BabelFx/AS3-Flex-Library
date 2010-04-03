@@ -64,13 +64,13 @@ package com.asfusion.mate.l10n.injectors
 
 		override public function set target(src:Object):void {
 			if (src != this.target) {
+				var oldVal : Object = this.target;
 				
 				if ((targetID != "") && (src != null)) {
 					// Should we only support instances with SPECIFIC ids?
 					if (src.hasOwnProperty("id") && (src["id"] != targetID)) return;
 				}
 				
-				var oldVal : Object = this.target;
 				super.target = src;
 				
 				dispatchEvent(PropertyChangeEvent.createUpdateEvent(this,"target",oldVal,src));

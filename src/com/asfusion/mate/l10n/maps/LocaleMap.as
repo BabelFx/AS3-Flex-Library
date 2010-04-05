@@ -22,12 +22,17 @@ package com.asfusion.mate.l10n.maps
 	import com.asfusion.mate.core.GlobalDispatcher;
 	import com.asfusion.mate.core.ListenerProxy;
 	import com.asfusion.mate.events.InjectorEvent;
+	import com.asfusion.mate.l10n.commands.ILocaleCommand;
+	import com.asfusion.mate.l10n.commands.LocaleCommand;
+	import com.asfusion.mate.l10n.events.*;
 	import com.asfusion.mate.utils.InjectorUtils;
 	
 	import flash.events.IEventDispatcher;
 	import flash.utils.Dictionary;
 	import flash.utils.getQualifiedClassName;
 	
+	import mx.core.ClassFactory;
+	import mx.core.IFactory;
 	import mx.events.FlexEvent;
 	import mx.utils.StringUtil;
 
@@ -39,7 +44,33 @@ package com.asfusion.mate.l10n.maps
 		// ************************************************************************************************
 		//  Public Properties
 		// ************************************************************************************************
+		
+		/**
+		 * Factory method that allows developers to build and use custom resourceBundle loaders within the LocaleMap 
+		 * subclasses.
+		 * 
+		 * @code
+		 *    <l10n:LocaleMap>
+		 * 		<l10n:commandFactory>
+		 * 				<mx:ClassFactory generator="{MyLocaleLoader}" properties="{loaderConfig}" />
+		 *      </l10n:commandFactory>
+		 * 	  </l0n:LocaleMap>
+		 *  
+		 * @param val Class with interface ILocaleCommand or a IFactory instance...
+		 * 
+		 */
+		public function set commandFactory(val:*):void {
+			if (val is IFactory)     _commandFactory = val as IFactory;
+			else if (val is Class)	 _commandFactory = new ClassFactory(val as Class);
+			else {
+				// Use internal default locale switcher command 
+				// LocaleCommand does not load external bundles, instead it simply switches embedded locales
+				_commandFactory = new ClassFactory(LocaleCommand);
 
+				trace(ERROR_INVALID_FACTORY);
+			}
+		}
+		
 		/**
 		 * An array of classes that, when an object is created, should trigger the <code>InjectorHandlers</code> to run. 
 		 * 
@@ -211,6 +242,9 @@ package com.asfusion.mate.l10n.maps
 			if (active == true) addListenerProxy   ( _dispatcher, FlexEvent.CREATION_COMPLETE );
 			else 				removeListenerProxy( _dispatcher, FlexEvent.CREATION_COMPLETE );
 			
+			if (active == true) _dispatcher.addEventListener(LocaleEvent.EVENT_ID,onLoadLocale,false,0,true);
+			else 				_dispatcher.removeEventListener(LocaleEvent.EVENT_ID,onLoadLocale);
+
 			listenForDerivatives(active);
 		}
 		
@@ -263,6 +297,14 @@ package com.asfusion.mate.l10n.maps
 		//  CreationComplete EventHandlers
 		// ************************************************************************************************
 		
+		protected function onLoadLocale(event:LocaleEvent):void {
+			var cmd : ILocaleCommand = _commandFactory.newInstance() as ILocaleCommand;
+			
+			// Delegate the event processing to the ILocaleCommand instance
+			if (cmd != null) cmd.execute(event);
+			else  			 trace(ERROR_INVALID_COMMAND_INSTANCE);
+		}
+		
 		/**
 		 * Called by the dispacher when the event gets triggered.
 		 * This method fires an event announcing that a target instance is READY (creationComplete).
@@ -300,6 +342,7 @@ package com.asfusion.mate.l10n.maps
 		//  Private Attributes
 		// ************************************************************************************************
 		
+		private var _commandFactory : IFactory = new ClassFactory(LocaleCommand);
 		 
 		protected var targetsRegistered			:Boolean = false;
 		protected var includeDerivativesChanged	:Boolean = false;
@@ -314,5 +357,8 @@ package com.asfusion.mate.l10n.maps
 		private var _listenerProxies			:Dictionary 		= new Dictionary(true);
 		
 		private namespace self;
+		
+		private static const ERROR_INVALID_FACTORY 			: String = "Error - LocaleMap::set commandFactory(). This method expects either (a) <ILocaleCommand> Class or (b) IFactory instance";
+		private static const ERROR_INVALID_COMMAND_INSTANCE : String = "Error - LocaleMap::commandFactory() does not generate an <ILocaleCommand> instance.";
 	}
 }

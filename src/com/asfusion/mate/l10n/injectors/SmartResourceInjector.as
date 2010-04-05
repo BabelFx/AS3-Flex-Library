@@ -20,7 +20,7 @@ Author: Thomas Burleson, Principal Architect
 package com.asfusion.mate.l10n.injectors
 {
 	 import com.asfusion.mate.l10n.maps.LocaleMap;
-	 import com.asfusion.mate.l10n.maps.LocaleMapEvent;
+	 import com.asfusion.mate.l10n.events.LocaleMapEvent;
 	 
 	 import flash.events.Event;
 	 import flash.events.IEventDispatcher;

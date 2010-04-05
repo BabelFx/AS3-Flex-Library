@@ -17,7 +17,7 @@ Author: Thomas Burleson, Principal Architect
                 
 @ignore
 */
-package com.asfusion.mate.l10n.maps
+package com.asfusion.mate.l10n.events
 {
 	import flash.events.Event;
 

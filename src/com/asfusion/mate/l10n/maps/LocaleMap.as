@@ -36,7 +36,8 @@ package com.asfusion.mate.l10n.maps
 	import mx.events.FlexEvent;
 	import mx.utils.StringUtil;
 
-	[Event(name='targetReady',type='com.asfusion.mate.l10n.maps.LocaleMapEvent')]
+	[Event(name='localeChanging',type='com.asfusion.mate.l10n.events.LocaleMapEvent')]
+	[Event(name='targetReady',	 type='com.asfusion.mate.l10n.events.LocaleMapEvent')]
 	
 	public class LocaleMap extends AbstractMap  {
 		
@@ -298,6 +299,9 @@ package com.asfusion.mate.l10n.maps
 		// ************************************************************************************************
 		
 		protected function onLoadLocale(event:LocaleEvent):void {
+			// Notify any listeners that a locale switch will happen next!
+			dispatchEvent(new LocaleMapEvent(LocaleMapEvent.LOCALE_CHANGING));
+			
 			var cmd : ILocaleCommand = _commandFactory.newInstance() as ILocaleCommand;
 			
 			// Delegate the event processing to the ILocaleCommand instance
@@ -310,8 +314,8 @@ package com.asfusion.mate.l10n.maps
 		 * This method fires an event announcing that a target instance is READY (creationComplete).
 		*/
 		protected function onCreationComplete_Target(event:InjectorEvent):void {
-			dispatchEvent(new LocaleMapEvent(event.injectorTarget));
 			logDebug("LocaleMap: onCreationComplete_Target() for '{0}'",[event.uid]);
+			dispatchEvent(new LocaleMapEvent(LocaleMapEvent.TARGET_READY, event.injectorTarget));
 		}
 
 		/**

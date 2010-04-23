@@ -16,7 +16,7 @@ package com.asfusion.mate.l10n.commands
 			
 			if (event is LocaleEvent) {
 				switch(LocaleEvent(event).action) {
-					case LocaleEvent.INITIALIZE  : initStartupLocale();						break;
+					case LocaleEvent.INITIALIZE  : initStartupLocale();							break;
 					case LocaleEvent.LOAD_LOCALE : loadLocale(LocaleEvent(event).locale);		break;
 				}
 			}
@@ -28,11 +28,9 @@ package com.asfusion.mate.l10n.commands
 
 		/**
 		 * Loads the startup locale based on current OS Locale preferences; 
-		 * unless overriden by FlashVars "localeChain" 
 		 * 
 		 */
 		protected function initStartupLocale():void {
-			// Nothing specified from the server/html wrapper, so look at OS Locale
 			loadLocale(defaultLocale);
 		}
 		
@@ -48,7 +46,7 @@ package com.asfusion.mate.l10n.commands
 		 * Determine the current OS setting for the preferred or default language locale
 		 * @return String with the localization setting expected by ResourceManager 
 		 */
-		static private function get defaultLocale():String {
+		static protected function get defaultLocale():String {
 			var locale : String = "";
 			
 				switch(String(Capabilities.language)) {
@@ -77,6 +75,6 @@ package com.asfusion.mate.l10n.commands
 		}
 		
 		
-		private var _localeMngr	:IResourceManager = ResourceManager.getInstance();
+		protected var _localeMngr	:IResourceManager = ResourceManager.getInstance();
 	}
 }

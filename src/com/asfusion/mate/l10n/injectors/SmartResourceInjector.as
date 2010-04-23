@@ -19,8 +19,8 @@ Author: Thomas Burleson, Principal Architect
 */
 package com.asfusion.mate.l10n.injectors
 {
-	 import com.asfusion.mate.l10n.maps.LocaleMap;
 	 import com.asfusion.mate.l10n.events.LocaleMapEvent;
+	 import com.asfusion.mate.l10n.maps.LocaleMap;
 	 
 	 import flash.events.Event;
 	 import flash.events.IEventDispatcher;
@@ -31,6 +31,7 @@ package com.asfusion.mate.l10n.injectors
 	 import mx.events.PropertyChangeEvent;
 	 import mx.events.StateChangeEvent;
 	 import mx.resources.IResourceManager;
+	 import mx.utils.ObjectProxy;
 
 	/**
 	 * Sample MXML Usage.
@@ -53,7 +54,11 @@ package com.asfusion.mate.l10n.injectors
 	  
 	public class SmartResourceInjector extends ResourceInjector {
 		
-		
+		/**
+		 * Special accessor to expose all collected instances  
+		 * @return Array of target class instances
+		 * 
+		 */
 		public function get targetInstances():Array {
 			return _instances;
 		}
@@ -235,12 +240,13 @@ package com.asfusion.mate.l10n.injectors
 				for each (var proxy:ITargetInjectable in _smartCache) {
 					if (proxy == null) continue;
 					
+					// (1) temp cache of class reference (if any)
 					var clazz : Class = (proxy.target as Class);
 
-					// Assignment of target actually fires injectors to perform injection...
-					// Restore individual Class targets...
-					
+					// (2) Assignment of target actually fires injectors to perform injection...
 					proxy.target = it;
+					
+					// (3) Restore cached, individual Class target (if any)
 					if (clazz != null) proxy.target = clazz;
 				}				
 			}
@@ -436,18 +442,23 @@ package com.asfusion.mate.l10n.injectors
 	    //  Private Attributes
 	    // *********************************************************************************
 	    
-	   	 /**
+		/**
 		  * Registered instances of ResourceProxy where "target" is initially null; which means
 		  * these proxies want runtime injection of target instances from SmartResourceInjector 
 		  */
 		 private var _smartCache      		: Array            = [];
 	     
 		 /**
-		  * Instances of the "target" class 
+		  * Cached Instances of the "target" class
+		  * @FIXME: need to use weak dictionary for GC to work properly 
 		  */
 		 private var _instances       		: Array            = [];	// @FIXME: This needs to be dictionary w/ weak references
 
 	
+		 /**
+		  * Should this Injector listen for  StateChangeEvent.CURRENT_STATE_CHANGE events
+		  * on all target instances?
+		  */		 
 		 private var _listenForStateChanges : Boolean    = false;
 		 
 		 static private const INVALID_USAGE : String     = "SmartResourceInjector can only be used with LocaleMaps";     

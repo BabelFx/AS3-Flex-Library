@@ -15,4 +15,11 @@
 		<nature>com.adobe.flexbuilder.project.flexlibnature</nature>
 		<nature>com.adobe.flexbuilder.project.actionscriptnature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>designs</name>
+			<type>2</type>
+			<location>/Users/thomasburleson/Documents/dev/frameworks/mate/l10n/designs</location>
+		</link>
+	</linkedResources>
 </projectDescription>

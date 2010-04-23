@@ -62,6 +62,10 @@ package com.asfusion.mate.l10n.injectors
 			}
 		}
 
+		/**
+		 * Reference to the current target instance that has been assigned or temporarily JUST injected.
+		 */		
+		[Bindable]
 		override public function set target(src:Object):void {
 			if (src != this.target) {
 				var oldVal : Object = this.target;

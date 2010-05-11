@@ -22,7 +22,6 @@ package com.asfusion.mate.l10n.maps
 	import com.asfusion.mate.core.GlobalDispatcher;
 	import com.asfusion.mate.core.ListenerProxy;
 	import com.asfusion.mate.events.InjectorEvent;
-	import com.asfusion.mate.l10n.commands.factory.CommandFactory;
 	import com.asfusion.mate.l10n.commands.ILocaleCommand;
 	import com.asfusion.mate.l10n.commands.LocaleCommand;
 	import com.asfusion.mate.l10n.events.*;
@@ -53,8 +52,17 @@ package com.asfusion.mate.l10n.maps
 		// ************************************************************************************************
 		
 
-		public function set logTarget(val : ILoggingTarget):void {
-			LocaleLogger.addLoggingTarget(val);
+		/**
+		 * Setter that accepts an TraceTarget instance or a ClassFactory for an ILoggingTarget generator
+		 *  
+		 * @param val ILoggingTarget or IFactory
+		 * 
+		 */
+		public function set logTarget(val : *):void {
+			var loggingTarget : ILoggingTarget = (val is ILoggingTarget) ? 	ILoggingTarget(val) 						  :
+												 (val is IFactory)		 ?	IFactory(val).newInstance() as ILoggingTarget : null;
+				
+			LocaleLogger.addLoggingTarget(loggingTarget);
 		}
 		
 		/**
@@ -62,10 +70,14 @@ package com.asfusion.mate.l10n.maps
 		 * subclasses.
 		 * 
 		 * @code
+		 * 
 		 *    <l10n:LocaleMap>
 		 * 		<l10n:commandFactory>
 		 * 				<mx:ClassFactory generator="{MyLocaleLoader}" properties="{loaderConfig}" />
 		 *      </l10n:commandFactory>
+		 * 		<l10n:loggingTarget>
+		 * 				<l10n:StaticClassFactory generator="{mx.logging.targets.TraceTarget}" properties="{{level:LogEventType.WARN + LogEventType.ERROR}}"
+		 * 		</l10n:logginTargets>
 		 * 	  </l0n:LocaleMap>
 		 *  
 		 * @param val Class with interface ILocaleCommand or a IFactory instance...
@@ -77,7 +89,7 @@ package com.asfusion.mate.l10n.maps
 			else {
 				// Use internal default locale switcher command 
 				// LocaleCommand does not load external bundles, instead it simply switches embedded locales
-				_commandFactory = new CommandFactory(LocaleCommand);
+				_commandFactory = new ClassFactory(LocaleCommand);
 				logger.error(ERROR_INVALID_FACTORY);
 			}
 		}
@@ -369,7 +381,7 @@ package com.asfusion.mate.l10n.maps
 		private var _dispatcher 				:GlobalDispatcher 	= new GlobalDispatcher();
 		private var _listenerProxies			:Dictionary 		= new Dictionary(true);
 
-		private var _commandFactory 			:IFactory 			= new CommandFactory(LocaleCommand);
+		private var _commandFactory 			:IFactory 			= new ClassFactory(LocaleCommand);
 		
 		private namespace self;
 		

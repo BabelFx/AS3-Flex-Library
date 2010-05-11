@@ -41,20 +41,20 @@ package com.asfusion.mate.utils.debug
 			return logger;
 		}
 		
-		public static function addLoggingTarget( loggingTarget:ILoggingTarget ):void
+		public static function addLoggingTarget( it:ILoggingTarget ):void
 		{
-			initializeTarget(loggingTarget);
+			if (it == null) return;
+			
+			initializeTarget(it);
 			
 			loggingTargets ||= [];
-			if( loggingTargets.indexOf( loggingTarget ) < 0 )
-				loggingTargets.push( loggingTarget );
+			if( loggingTargets.indexOf( it ) < 0 ) loggingTargets.push( it );
 			
-			if( loggers != null )
-			{
-				for each( var logger:ILogger in loggers )
-				{
-					if( categoryMatchInFilterList( logger.category, loggingTarget.filters ) )
-						loggingTarget.addLogger( logger );
+			if( loggers != null ) {
+				
+				for each( var logger:ILogger in loggers ) {
+					if( categoryMatchInFilterList( logger.category, it.filters ) )
+						it.addLogger( logger );
 				}
 			}
 		}

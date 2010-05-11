@@ -105,7 +105,7 @@ package com.asfusion.mate.l10n.maps
 
 		public function addTarget(target:Class):void {
 			if (target && !alreadyRegistered(target)) {
-				targets = targets.concat([target]);
+				targets.push(target);
 			}
 		}
 		
@@ -284,11 +284,11 @@ package com.asfusion.mate.l10n.maps
 				includeDerivativesChanged = false;
 				
 				if(includeDerivatives && active) {
-					_dispatcher.addEventListener( InjectorEvent.INJECT_DERIVATIVES, onCreationComplete_Derivative, false, 0, true);
 					logDebug("LocaleMap: Attaching listener for Derivative creationComplete");
+					_dispatcher.addEventListener( InjectorEvent.INJECT_DERIVATIVES, onCreationComplete_Derivative, false, 0, true);
 				} else {
-					_dispatcher.removeEventListener( InjectorEvent.INJECT_DERIVATIVES, onCreationComplete_Derivative );
 					logDebug("LocaleMap: Removing listener for Derivative creationComplete");
+					_dispatcher.removeEventListener( InjectorEvent.INJECT_DERIVATIVES, onCreationComplete_Derivative );
 				}
 			}						
 		}
@@ -313,8 +313,8 @@ package com.asfusion.mate.l10n.maps
 		 * Called by the dispacher when the event gets triggered.
 		 * This method fires an event announcing that a target instance is READY (creationComplete).
 		*/
-		protected function onCreationComplete_Target(event:InjectorEvent):void {
-			logDebug("LocaleMap: onCreationComplete_Target() for '{0}'",[event.uid]);
+		protected function onCreationComplete_Target(event:InjectorEvent, logIt:Boolean=true):void {
+			if (logIt == true) logDebug("LocaleMap: onCreationComplete_Target() for '{0}'",[event.uid]);
 			dispatchEvent(new LocaleMapEvent(LocaleMapEvent.TARGET_READY, event.injectorTarget));
 		}
 
@@ -329,9 +329,8 @@ package com.asfusion.mate.l10n.maps
 					var isDerivative : Boolean = InjectorUtils.isDerivative( event.injectorTarget, currentTarget  );
 					
 					if( isDerivative == true )   {
-						onCreationComplete_Target( event );				
-						
 						logDebug("LocaleMap: onCreationComplete_Derivative() for '{0}'",[event.uid]);
+						onCreationComplete_Target( event, false );				
 					}
 				}
 			}

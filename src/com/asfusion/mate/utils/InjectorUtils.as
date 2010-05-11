@@ -23,6 +23,7 @@ package com.asfusion.mate.utils
 	import flash.utils.getQualifiedClassName;
 	
 	import mx.core.UIComponent;
+	import mx.utils.StringUtil;
 	
 	public class InjectorUtils
 	{
@@ -38,11 +39,13 @@ package com.asfusion.mate.utils
 		 	if( targetClass && injectorTarget ) {
 		 	
 			 	var compareClass:Class = ( targetClass is Class ) ? targetClass : getDefinitionByName( targetClass ) as Class;
-			 	if( injectorTarget is compareClass )
+			 	if(compareClass!=null && (injectorTarget is compareClass))
 			 	{
+					// So is in the inheritance scope... but is it the SAME class?
 			 		var targetClassName:String = getQualifiedClassName( injectorTarget );
 			 		var compareClassName:String = getQualifiedClassName( compareClass );
-			 		foundDerivative = ( targetClassName !==  compareClassName );
+					
+			 		foundDerivative = ( targetClassName != compareClassName );
 			 	}
 			}
 		 
@@ -50,7 +53,16 @@ package com.asfusion.mate.utils
 		 }
 		 
 		 static public function isSameClass(injectorTarget:Class, targetClass:Class):Boolean {
-		 	var results : Boolean = (targetClass && injectorTarget) ? (targetClass == injectorTarget) : false; 
+		 	var results : Boolean = false;
+			
+			 	if( injectorTarget!=null && targetClass!=null )
+			 	{
+			 		var injectorClassName :String = getQualifiedClassName( injectorTarget );
+			 		var targetClassName   :String = getQualifiedClassName( targetClass );
+					
+			 		results = ( injectorClassName == targetClassName );
+			 	}
+				
 		 	return results;
 		 }
 

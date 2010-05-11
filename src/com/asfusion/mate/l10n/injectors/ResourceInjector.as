@@ -418,13 +418,13 @@ package com.asfusion.mate.l10n.injectors
 					
 					switch(map.type) {
 						
-						case "string"	: assignKeyValue(_resourceManager.getString(map.bundleName,map.key,map.parameters));				 break;
+						case "string"	: assignKeyValue(_resourceManager.getString(map.bundleName,map.key,map.parameters));				break;
 						case "boolean"	: assignKeyValue(_resourceManager.getBoolean(map.bundleName,map.key));					  	break;
 						case "uint"     : assignKeyValue(_resourceManager.getUint(map.bundleName,map.key));						 		break;
 						case "int"      : assignKeyValue(_resourceManager.getInt(map.bundleName,map.key));							  break;
 						case "object"   : assignKeyValue(_resourceManager.getObject(map.bundleName,map.key));						  break;
 						case "array"    : assignKeyValue(_resourceManager.getStringArray(map.bundleName,map.key));					  break;
-						case "class"    : assignKeyValue(_resourceManager.getClass(map.bundleName,map.key));								 break;
+						case "class"    : assignKeyValue(_resourceManager.getClass(map.bundleName,map.key));								break;
 						
 						default         : logError(map,ERROR_UNKNOWN_DATATYPE);															 break;
 					}
@@ -434,6 +434,8 @@ package com.asfusion.mate.l10n.injectors
 			}
 			
 					function assignKeyValue(val:*):void {
+						if (val == null) logError(map, ERROR_KEY_VALUE_MISSING);
+						
 						if (ui.hasOwnProperty(property) == true) 	ui[property] = val;
 						else 										(ui as UIComponent).setStyle(property,val);
 					}
@@ -547,14 +549,37 @@ package com.asfusion.mate.l10n.injectors
 	   	 	var targetID : String = getTargetIdentifier(map.target);
 	   	 	var details  : String = "";
 	   	 	switch(errorType) {
-	   	 		case ERROR_UNKNOWN_PROPERTY : details = StringUtil.substitute(errorType, [targetID, map.property, 	map.key													 ]);		break;
-	   	 		case ERROR_UNKNOWN_DATATYPE : details = StringUtil.substitute(errorType, [map.type, map.key, 		targetID, 	map.property]);		break;
-	   	 		case ERROR_UNKNOWN_NODE     : details = StringUtil.substitute(errorType, [targetID, map.property, 	map.key, 	node        ]);	 break;
-				case ERROR_UNKNOWN_BUNDLE   : details = StringUtil.substitute(errorType, [targetID                                          ]);	 break;;
+	   	 		case ERROR_UNKNOWN_PROPERTY : 
+				{
+					details = StringUtil.substitute(errorType, [targetID, map.property, 	map.key													 ]);		
+					log.warn(details);
+					break;
+				}
+	   	 		case ERROR_UNKNOWN_DATATYPE : {
+					details = StringUtil.substitute(errorType, [map.type, map.key, 		targetID, 	map.property]);
+					log.error(details);
+					break;	
+				}
+	   	 		case ERROR_UNKNOWN_NODE     : 
+				{
+					details = StringUtil.substitute(errorType, [targetID, map.property, 	map.key, 	node        ]);
+					log.warn(details);
+					break;	
+				}
+				case ERROR_UNKNOWN_BUNDLE   : 
+				{
+					details = StringUtil.substitute(errorType, [targetID                                          ]);
+					log.error(details);
+					break;
+				}
+				case ERROR_KEY_VALUE_MISSING: 
+				{
+					details = StringUtil.substitute(errorType, [targetID, map.key																		]);
+					log.error(details);
+					break;
+				}
 	   	 	}
 	   	 	
-	   	 	log.warn(details);
-				
 				function getTargetIdentifier(inst:Object):String {
 					var results : String = (inst != null) ? getQualifiedClassName( inst ) : "<???>";
 					
@@ -572,6 +597,7 @@ package com.asfusion.mate.l10n.injectors
 	     private static const ERROR_UNKNOWN_DATATYPE : String = "Unknown data type {0} when mapping resource key '{1}' to {2}[{3}].";
 	     private static const ERROR_UNKNOWN_NODE     : String = "Unresolved node '{3}' in property {0}[{1}] for resource key '{2}'.";
 		 private static const ERROR_UNKNOWN_BUNDLE   : String = "Unknown or unspecified bundlename for target '{0}'!";
+		 private static const ERROR_KEY_VALUE_MISSING: String = "Bundle {0} does not have the resource key '{1}'!";
 		 
 	   	 private var _cached          : Object           = null;
 	   	 private var _registry        : Dictionary       = new Dictionary(true);

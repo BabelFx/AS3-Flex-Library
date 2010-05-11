@@ -116,7 +116,7 @@ package com.asfusion.mate.utils.debug
 											    ];
 					
 					tracer.filters			= tracer["filters"].concat(l10nPackages);
-					tracer.level			= LogEventLevel.DEBUG;
+					tracer.level			= (tracer.level == LogEventLevel.ALL) ? LogEventLevel.DEBUG : tracer.level;
 					tracer.includeDate		= false;
 					tracer.includeTime		= true;
 					tracer.includeCategory  = true;

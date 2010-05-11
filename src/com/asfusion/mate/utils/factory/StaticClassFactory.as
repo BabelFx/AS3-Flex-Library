@@ -138,7 +138,7 @@ package com.asfusion.mate.utils.factory {
         * The implementation of newInstance is required by IFactory 
         */ 
 		public function newInstance():* {
-			var results:* = factoryFunction ? null : wrappedClassFactory.newInstance();
+			var results:* = (factoryFunction != null) ? null : wrappedClassFactory.newInstance();
 			
 		    // using a function to create an object
 			// Copy the properties to the new object 

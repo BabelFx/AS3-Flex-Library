@@ -22,10 +22,12 @@ package com.asfusion.mate.l10n.maps
 	import com.asfusion.mate.core.GlobalDispatcher;
 	import com.asfusion.mate.core.ListenerProxy;
 	import com.asfusion.mate.events.InjectorEvent;
+	import com.asfusion.mate.l10n.commands.factory.CommandFactory;
 	import com.asfusion.mate.l10n.commands.ILocaleCommand;
 	import com.asfusion.mate.l10n.commands.LocaleCommand;
 	import com.asfusion.mate.l10n.events.*;
 	import com.asfusion.mate.utils.InjectorUtils;
+	import com.asfusion.mate.utils.debug.LocaleLogger;
 	
 	import flash.events.IEventDispatcher;
 	import flash.utils.Dictionary;
@@ -34,6 +36,11 @@ package com.asfusion.mate.l10n.maps
 	import mx.core.ClassFactory;
 	import mx.core.IFactory;
 	import mx.events.FlexEvent;
+	import mx.logging.ILogger;
+	import mx.logging.ILoggingTarget;
+	import mx.logging.Log;
+	import mx.logging.LogEventLevel;
+	import mx.logging.targets.TraceTarget;
 	import mx.utils.StringUtil;
 
 	[Event(name='localeChanging',type='com.asfusion.mate.l10n.events.LocaleMapEvent')]
@@ -41,10 +48,14 @@ package com.asfusion.mate.l10n.maps
 	
 	public class LocaleMap extends AbstractMap  {
 		
-
 		// ************************************************************************************************
 		//  Public Properties
 		// ************************************************************************************************
+		
+
+		public function set logTarget(val : ILoggingTarget):void {
+			LocaleLogger.addLoggingTarget(val);
+		}
 		
 		/**
 		 * Factory method that allows developers to build and use custom resourceBundle loaders within the LocaleMap 
@@ -66,9 +77,8 @@ package com.asfusion.mate.l10n.maps
 			else {
 				// Use internal default locale switcher command 
 				// LocaleCommand does not load external bundles, instead it simply switches embedded locales
-				_commandFactory = new ClassFactory(LocaleCommand);
-
-				trace(ERROR_INVALID_FACTORY);
+				_commandFactory = new CommandFactory(LocaleCommand);
+				logger.error(ERROR_INVALID_FACTORY);
 			}
 		}
 		
@@ -87,7 +97,7 @@ package com.asfusion.mate.l10n.maps
 			var newValue:Array = (value is Array) ? value as Array :
 			                     (value is Class) ? [value]        : [];
 			
-			if (!isInitialized) {
+			if (!_isInitialized) {
 				// Fix to init issue with Flex4 (must preserve all targets)
 				// Only after initialization, does assigning targets CLEAR all
 				// current targets...
@@ -97,8 +107,8 @@ package com.asfusion.mate.l10n.maps
 			if (oldValue !== newValue)
 	        {
 	        	if(targetsRegistered) unregisterAll();
-	        	
 	        	_targets = newValue;
+				
 	        	invalidateProperties();
 	        }
 		}
@@ -177,20 +187,17 @@ package com.asfusion.mate.l10n.maps
 		*/
 		public function invalidateProperties():void
 		{
-			if( !isInitialized ) needsInvalidation = true;
-			else				 commitProperties();
+			if( _isInitialized == true ) commitProperties();
 		}
 		
 
 
 		override public function initialized(document:Object, id:String):void {
 			super.initialized(document,id);
-
-			if( needsInvalidation )
-			{
-				commitProperties();
-				needsInvalidation = false;
-			}			
+			
+			_isInitialized = true;
+			
+			commitProperties();
 		}
 		
 		// ************************************************************************************************
@@ -219,7 +226,7 @@ package com.asfusion.mate.l10n.maps
 				{
 					var currentType:String = ( currentTarget is Class) ? getQualifiedClassName(currentTarget) : currentTarget;
 					_dispatcher.removeEventListener(currentType, onCreationComplete_Target);
-					logDebug("UnRegisters target {0}",[currentType]);
+					logger.debug("unregisterAll() target {0}",currentType);
 				}
 				targetsRegistered = false;
 			}
@@ -230,7 +237,7 @@ package com.asfusion.mate.l10n.maps
 			
 			if (currentType && currentType != "") {
 				_dispatcher.addEventListener( currentType, onCreationComplete_Target, false, 0, true);
-				logDebug("Registered target {0}",[currentType]);
+				logger.debug("register({0})",currentType);
 			}
 		}
 		
@@ -262,7 +269,7 @@ package com.asfusion.mate.l10n.maps
 			listenerProxy.addListener((type == null) ? "creationComplete" : type, 
 									  (type == null) ? this 			  : null );
 
-			logDebug("LocaleMap: Attaching listenerProxy for creationComplete");
+			logger.debug("addListenerProxy() Attaching for creationComplete");
 			
 
 			return listenerProxy;
@@ -274,7 +281,7 @@ package com.asfusion.mate.l10n.maps
 			if(listenerProxy && type && (type != "")) {
 				listenerProxy.removeListener(type);
 				delete _listenerProxies[eventDispatcher];
-				logDebug("LocaleMap: Removing listenerProxy for creationComplete");			
+				logger.debug("removeListenerProxy() for creationComplete");			
 			}	
 		}
 		
@@ -285,10 +292,10 @@ package com.asfusion.mate.l10n.maps
 				includeDerivativesChanged = false;
 				
 				if(includeDerivatives && active) {
-					logDebug("LocaleMap: Attaching listener for Derivative creationComplete");
+					logger.debug("listenForDerivatives() Attaching listener for Derivative creationComplete");
 					_dispatcher.addEventListener( InjectorEvent.INJECT_DERIVATIVES, onCreationComplete_Derivative, false, 0, true);
 				} else {
-					logDebug("LocaleMap: Removing listener for Derivative creationComplete");
+					logger.debug("listenForDerivatives() Removing listener for Derivative creationComplete");
 					_dispatcher.removeEventListener( InjectorEvent.INJECT_DERIVATIVES, onCreationComplete_Derivative );
 				}
 			}						
@@ -304,10 +311,14 @@ package com.asfusion.mate.l10n.maps
 			dispatchEvent(new LocaleMapEvent(LocaleMapEvent.LOCALE_CHANGING));
 			
 			var cmd : ILocaleCommand = _commandFactory.newInstance() as ILocaleCommand;
+			if ((cmd is LocaleCommand) && (LocaleCommand(cmd).log == null)) {
+				// Attach customized logger
+				LocaleCommand(cmd).log = LocaleLogger.getLogger(cmd, true);	
+			}
 			
 			// Delegate the event processing to the ILocaleCommand instance
 			if (cmd != null) cmd.execute(event);
-			else  			 trace(ERROR_INVALID_COMMAND_INSTANCE);
+			else  			 logger.error(ERROR_INVALID_COMMAND_INSTANCE);
 		}
 		
 		/**
@@ -315,7 +326,7 @@ package com.asfusion.mate.l10n.maps
 		 * This method fires an event announcing that a target instance is READY (creationComplete).
 		*/
 		protected function onCreationComplete_Target(event:InjectorEvent, logIt:Boolean=true):void {
-			if (logIt == true) logDebug("LocaleMap: onCreationComplete_Target() for '{0}'",[event.uid]);
+			if (logIt == true) logger.debug("onCreationComplete_Target() for '{0}'",event.uid);
 			dispatchEvent(new LocaleMapEvent(LocaleMapEvent.TARGET_READY, event.injectorTarget));
 		}
 
@@ -330,35 +341,35 @@ package com.asfusion.mate.l10n.maps
 					var isDerivative : Boolean = InjectorUtils.isDerivative( event.injectorTarget, currentTarget  );
 					
 					if( isDerivative == true )   {
-						logDebug("LocaleMap: onCreationComplete_Derivative() for '{0}'",[event.uid]);
+						logger.debug("onCreationComplete_Derivative() for '{0}'",event.uid);
 						onCreationComplete_Target( event, false );				
 					}
 				}
 			}
 		}
 		
-		private function logDebug(format:String,params:Array=null):void {
-			//trace(StringUtil.substitute(format,!params ? [] : params));
-		}
-		
 		
 		// ************************************************************************************************
 		//  Private Attributes
 		// ************************************************************************************************
-		
-		private var _commandFactory : IFactory = new ClassFactory(LocaleCommand);
 		 
+		
+		private function get logger():ILogger {
+			return LocaleLogger.getLogger(this, false);
+		}
+		
 		protected var targetsRegistered			:Boolean = false;
 		protected var includeDerivativesChanged	:Boolean = false;
 
 		private var _targets					:Array   = [ ];
 		private var _includeDerivatives			:Boolean = false;
 	
-		private var needsInvalidation			:Boolean = true;
-		private var isInitialized				:Boolean = false;
+		private var _isInitialized				:Boolean = false;
 		
 		private var _dispatcher 				:GlobalDispatcher 	= new GlobalDispatcher();
 		private var _listenerProxies			:Dictionary 		= new Dictionary(true);
+
+		private var _commandFactory 			:IFactory 			= new CommandFactory(LocaleCommand);
 		
 		private namespace self;
 		

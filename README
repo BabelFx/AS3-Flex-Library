@@ -1,4 +1,4 @@
-Multilanguage (l10n) Injection for Flex 
+Multilanguage (l10n) Injection for Flex (v1.0b1.1)
 
 Integrating IoC concepts with the power of MXML, this library provides a powerful, easy framework for runtime injection of localized resources (strings, bitmaps, skins, etc.) in Flex 2/3/4 views and models.
 Using a single LocalizationMap instance, developers can centralize all mappings of localized resources to specific destinations and usages. Whenever the locale changes, resources are re-injected into specified destinations.

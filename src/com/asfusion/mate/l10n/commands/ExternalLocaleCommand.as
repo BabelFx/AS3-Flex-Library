@@ -71,7 +71,8 @@ package com.asfusion.mate.l10n.commands
 			_localeToLoad = locale;
 			
 			if (alreadyLoaded != true) {
-				 
+				log.debug("loadLocale({0}) - external",locale);
+				
 				var dispatcher : IEventDispatcher = _localeMngr.loadResourceModule(this.urlExternalLocale,false);
 				    dispatcher.addEventListener(ResourceEvent.COMPLETE,onResult_localeLoaded);
 				    dispatcher.addEventListener(ResourceEvent.ERROR,onError_localeLoaded);
@@ -91,9 +92,11 @@ package com.asfusion.mate.l10n.commands
 			 if (((_localeToLoad != "") && !event) || (event.type == ResourceEvent.COMPLETE)) {
 				// Note: ResourceManager searches bundles for locales from first (0-index) to last
 				//       the last locale is the "fallback" bundle. As such, en_US should always be the last.
-				var fallback : Array = [defaultLocale];
+				var fallback     : Array = [defaultLocale];
+				var localeChain  : Array = (_localeToLoad == fallback[0]) ? fallback : [_localeToLoad].concat(fallback);		// ["fr_FR","en_US"] 
 				
-				_localeMngr.localeChain = (_localeToLoad == fallback[0]) ? fallback : [_localeToLoad].concat(fallback);		// ["fr_FR","en_US"]
+				log.debug("onResult_localeLoaded({0})",localeChain);
+				_localeMngr.localeChain = localeChain;
 			} 
 			
 			// Cleanup
@@ -102,7 +105,8 @@ package com.asfusion.mate.l10n.commands
 		
 		private function onError_localeLoaded(event:ResourceEvent):void {
 			// @TODO Throw a FaultEvent for global alerts.
-			trace(StringUtil.substitute("Resource load failed for url='{0}'",[this.urlExternalLocale]));
+			
+			log.debug("onError_localeLoaded(url={0}) - load failed",this.urlExternalLocale);
 		}
 		
 		

@@ -19,9 +19,10 @@ Author: Thomas Burleson, Principal Architect
 */
 package com.asfusion.mate.l10n.injectors
 {
-	 import com.asfusion.mate.l10n.maps.LocaleMap;
 	 import com.asfusion.mate.l10n.events.LocaleMapEvent;
+	 import com.asfusion.mate.l10n.maps.LocaleMap;
 	 import com.asfusion.mate.utils.InjectorUtils;
+	 import com.asfusion.mate.utils.debug.LocaleLogger;
 	 
 	 import flash.events.Event;
 	 import flash.events.EventDispatcher;
@@ -35,6 +36,7 @@ package com.asfusion.mate.l10n.injectors
 	 import mx.events.FlexEvent;
 	 import mx.events.PropertyChangeEvent;
 	 import mx.events.StateChangeEvent;
+	 import mx.logging.ILogger;
 	 import mx.resources.IResourceManager;
 	 import mx.resources.ResourceManager;
 	 import mx.utils.StringUtil;
@@ -59,6 +61,8 @@ package com.asfusion.mate.l10n.injectors
 	  
 	public class ResourceInjector extends EventDispatcher implements IMXMLObject {
 		
+		 public var log		   : ILogger= LocaleLogger.getLogger(this, false);
+		 
 		 public var id         : String = "";
 		 public var bundleName : String = ""; 
 			
@@ -410,7 +414,7 @@ package com.asfusion.mate.l10n.injectors
 				} else if (isValidTargetState(map) == true) {
 					
 					// _counter ++;
-					// trace(StringUtil.substitute("l10nInjection ({0}): {1} -> {2}",[_counter, map.key,map.property]));
+					//log.debug("l10nInjection ({0}): {1} -> {2}",_counter, map.key,map.property));
 					
 					switch(map.type) {
 						
@@ -549,7 +553,7 @@ package com.asfusion.mate.l10n.injectors
 				case ERROR_UNKNOWN_BUNDLE   : details = StringUtil.substitute(errorType, [targetID                                          ]);	 break;;
 	   	 	}
 	   	 	
-	   	 	trace ("ResourceInjector (warning): " + details);
+	   	 	log.warn(details);
 				
 				function getTargetIdentifier(inst:Object):String {
 					var results : String = (inst != null) ? getQualifiedClassName( inst ) : "<???>";
@@ -564,7 +568,7 @@ package com.asfusion.mate.l10n.injectors
 		
 		 private static var _counter : int = 0;
 		 
-	     private static const ERROR_UNKNOWN_PROPERTY : String = "{0}['{1}'] is unknown for resource key '{2}'.";
+	     private static const ERROR_UNKNOWN_PROPERTY : String = "target {0}['{1}'] is unknown for resource key '{2}'.";
 	     private static const ERROR_UNKNOWN_DATATYPE : String = "Unknown data type {0} when mapping resource key '{1}' to {2}[{3}].";
 	     private static const ERROR_UNKNOWN_NODE     : String = "Unresolved node '{3}' in property {0}[{1}] for resource key '{2}'.";
 		 private static const ERROR_UNKNOWN_BUNDLE   : String = "Unknown or unspecified bundlename for target '{0}'!";

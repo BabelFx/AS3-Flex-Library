@@ -5,6 +5,7 @@ package com.asfusion.mate.l10n.commands
 	import flash.net.*;
 	import flash.system.Capabilities;
 	
+	import mx.logging.ILogger;
 	import mx.managers.*;
 	import mx.resources.IResourceBundle;
 	import mx.resources.IResourceManager;
@@ -12,6 +13,9 @@ package com.asfusion.mate.l10n.commands
 	
 	public class LocaleCommand implements ILocaleCommand
 	{	
+		
+		public var log : ILogger = null;
+		
 		public function execute( event:LocaleEvent ):void {
 			
 			if (event is LocaleEvent) {
@@ -31,6 +35,7 @@ package com.asfusion.mate.l10n.commands
 		 * 
 		 */
 		protected function initStartupLocale():void {
+			log.debug("initStartupLocale()");
 			loadLocale(defaultLocale);
 		}
 		
@@ -39,7 +44,12 @@ package com.asfusion.mate.l10n.commands
 		 */
 		protected function loadLocale(locale:String):void {
 			// Always default back to the preferred OS locale setting...
-			_localeMngr.localeChain = [locale,defaultLocale];
+			var localeChain : Array = locale != defaultLocale ? [locale,defaultLocale] : [locale];
+			
+			log.debug("loadLocale({0}) - embedded.",localeChain);
+			_localeMngr.localeChain = localeChain;
+			
+			
 		}
 		
 		/**

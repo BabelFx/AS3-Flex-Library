@@ -91,7 +91,7 @@ package com.asfusion.mate.l10n.maps
 				// Fix to init issue with Flex4 (must preserve all targets)
 				// Only after initialization, does assigning targets CLEAR all
 				// current targets...
-				newValue = targets.concat(newValue);	
+				newValue = newValue.concat(targets);	
 			}
 	        
 			if (oldValue !== newValue)
@@ -103,9 +103,10 @@ package com.asfusion.mate.l10n.maps
 	        }
 		}
 
-		public function addTarget(target:Class):void {
-			if (target && !alreadyRegistered(target)) {
-				targets.push(target);
+		public function addTarget(another:Class):void {
+			if (another && !alreadyRegistered(another)) {
+				_targets.push(another);
+				invalidateProperties();
 			}
 		}
 		
@@ -353,7 +354,7 @@ package com.asfusion.mate.l10n.maps
 		private var _targets					:Array   = [ ];
 		private var _includeDerivatives			:Boolean = false;
 	
-		private var needsInvalidation			:Boolean = false;
+		private var needsInvalidation			:Boolean = true;
 		private var isInitialized				:Boolean = false;
 		
 		private var _dispatcher 				:GlobalDispatcher 	= new GlobalDispatcher();

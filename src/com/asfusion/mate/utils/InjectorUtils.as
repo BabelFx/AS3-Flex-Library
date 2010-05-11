@@ -19,6 +19,7 @@ Author: Thomas Burleson, Principal Architect
 */
 package com.asfusion.mate.utils
 {
+	import flash.utils.Dictionary;
 	import flash.utils.getDefinitionByName;
 	import flash.utils.getQualifiedClassName;
 	
@@ -42,8 +43,8 @@ package com.asfusion.mate.utils
 			 	if(compareClass!=null && (injectorTarget is compareClass))
 			 	{
 					// So is in the inheritance scope... but is it the SAME class?
-			 		var targetClassName:String = getQualifiedClassName( injectorTarget );
-			 		var compareClassName:String = getQualifiedClassName( compareClass );
+			 		var targetClassName:String = getClazzName( injectorTarget as Class );
+			 		var compareClassName:String = getClazzName( compareClass );
 					
 			 		foundDerivative = ( targetClassName != compareClassName );
 			 	}
@@ -55,10 +56,11 @@ package com.asfusion.mate.utils
 		 static public function isSameClass(injectorTarget:Class, targetClass:Class):Boolean {
 		 	var results : Boolean = false;
 			
+			
 			 	if( injectorTarget!=null && targetClass!=null )
 			 	{
-			 		var injectorClassName :String = getQualifiedClassName( injectorTarget );
-			 		var targetClassName   :String = getQualifiedClassName( targetClass );
+			 		var injectorClassName :String = getClazzName( injectorTarget );
+			 		var targetClassName   :String = getClazzName( targetClass );
 					
 			 		results = ( injectorClassName == targetClassName );
 			 	}
@@ -132,5 +134,18 @@ package com.asfusion.mate.utils
 	   	 	
 	   	 	return results;
 	   	 }
+
+		static private const _lookups : Dictionary = new Dictionary(true);
+		
+		static private function getClazzName(clazz:Class):String {
+			var results : String = _lookups[clazz] as String;
+			if (results == null) {
+				results = getQualifiedClassName(clazz);
+				_lookups[clazz] = results;
+			}
+			return results;
+		}
+
+	
 	}
 }

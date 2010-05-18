@@ -26,7 +26,9 @@ package com.asfusion.mate.utils.debug
 			// if the logger doesn't already exist, create and store it
 			if( logger == null )
 			{
-				var category : String = fullPath ? className : className.substr(className.indexOf("::")+2);
+				var category : String = fullPath 					 ?  className 									: 
+									    className.indexOf("::") >= 0 ?	className.substr(className.indexOf("::")+2)	:
+										className;
 				logger = new LocaleLogger( category, new ConstructorLock);
 				loggers[ className ] = logger;
 			}

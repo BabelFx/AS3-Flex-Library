@@ -334,6 +334,8 @@ package com.asfusion.mate.l10n.injectors
 		 * 
 		 */
 		protected function onTargetStateChange(event:StateChangeEvent):void {
+			log.debug("onTargetStateChange({0})",event.newState);
+			
 			assignResourceValues(event.newState);
 		}
 		
@@ -385,7 +387,10 @@ package com.asfusion.mate.l10n.injectors
 				}
 			}
 			
-			if (announceChanges == true) dispatchEvent(new Event(Event.CHANGE));
+			if (announceChanges == true) {
+				log.debug("announcing Event.CHANGE");
+				dispatchEvent(new Event(Event.CHANGE));
+			}
 			
 			return announceChanges;
 	   	 }	 
@@ -435,6 +440,8 @@ package com.asfusion.mate.l10n.injectors
 			
 					function assignKeyValue(val:*):void {
 						if (val == null) logError(map, ERROR_KEY_VALUE_MISSING);
+						
+						log.debug(StringUtil.substitute("inject '{0}' into '{1}' from resource {2}::{3}",[val,map.property,map.bundleName,map.key]));
 						
 						if (ui.hasOwnProperty(property) == true) 	ui[property] = val;
 						else 										(ui as UIComponent).setStyle(property,val);

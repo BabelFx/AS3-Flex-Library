@@ -27,6 +27,7 @@ package com.asfusion.mate.l10n.maps
 	import com.asfusion.mate.l10n.events.*;
 	import com.asfusion.mate.utils.InjectorUtils;
 	import com.asfusion.mate.utils.debug.LocaleLogger;
+	import com.asfusion.mate.utils.factory.StaticClassFactory;
 	
 	import flash.events.IEventDispatcher;
 	import flash.utils.Dictionary;
@@ -51,7 +52,16 @@ package com.asfusion.mate.l10n.maps
 		//  Public Properties
 		// ************************************************************************************************
 		
-
+		public function set enableLog(val:Boolean):void {
+			_debugEnabled = val;
+			
+			if (val && !_logTarget) {
+				// Attach customized logger
+				this.logTarget = new StaticClassFactory(TraceTarget,{level:LogEventLevel.DEBUG});
+			}
+		}
+		
+		
 		/**
 		 * Setter that accepts an TraceTarget instance or a ClassFactory for an ILoggingTarget generator
 		 *  
@@ -59,10 +69,15 @@ package com.asfusion.mate.l10n.maps
 		 * 
 		 */
 		public function set logTarget(val : *):void {
-			var loggingTarget : ILoggingTarget = (val is ILoggingTarget) ? 	ILoggingTarget(val) 						  :
-												 (val is IFactory)		 ?	IFactory(val).newInstance() as ILoggingTarget : null;
-				
-			LocaleLogger.addLoggingTarget(loggingTarget);
+			if (val == null) return;	// Clear existing target not supported
+			
+			_logTarget = (val is ILoggingTarget) ? 	ILoggingTarget(val) 						  :
+						 (val is IFactory)		 ?	IFactory(val).newInstance() as ILoggingTarget : null;
+			
+			if (_logTarget != null) {
+				_debugEnabled = true;
+				LocaleLogger.addLoggingTarget(_logTarget);
+			}
 		}
 		
 		/**
@@ -84,14 +99,18 @@ package com.asfusion.mate.l10n.maps
 		 * 
 		 */
 		public function set commandFactory(val:*):void {
+			if (val == null) return;
+			
 			if (val is IFactory)     _commandFactory = val as IFactory;
-			else if (val is Class)	 _commandFactory = new ClassFactory(val as Class);
+			else if (val is Class)	 _commandFactory = new StaticClassFactory(val as Class);
 			else {
 				// Use internal default locale switcher command 
 				// LocaleCommand does not load external bundles, instead it simply switches embedded locales
-				_commandFactory = new ClassFactory(LocaleCommand);
+				_commandFactory = new StaticClassFactory(LocaleCommand);
 				logger.error(ERROR_INVALID_FACTORY);
 			}
+			
+			_isCustomFactory = true;
 		}
 		
 		/**
@@ -263,8 +282,14 @@ package com.asfusion.mate.l10n.maps
 			if (active == true) addListenerProxy   ( _dispatcher, FlexEvent.CREATION_COMPLETE );
 			else 				removeListenerProxy( _dispatcher, FlexEvent.CREATION_COMPLETE );
 			
-			if (active == true) _dispatcher.addEventListener(LocaleEvent.EVENT_ID,onLoadLocale,false,0,true);
-			else 				_dispatcher.removeEventListener(LocaleEvent.EVENT_ID,onLoadLocale);
+			if (active == true) {
+				_dispatcher.addEventListener(LocaleEvent.EVENT_ID,onLoadLocale,false,0,true);
+				this.addEventListener(LocaleEvent.EVENT_ID,onLoadLocale);
+			}
+			else {
+				_dispatcher.removeEventListener(LocaleEvent.EVENT_ID,onLoadLocale);
+				this.removeEventListener(LocaleEvent.EVENT_ID,onLoadLocale);
+			}
 
 			listenForDerivatives(active);
 		}
@@ -281,7 +306,7 @@ package com.asfusion.mate.l10n.maps
 			listenerProxy.addListener((type == null) ? "creationComplete" : type, 
 									  (type == null) ? this 			  : null );
 
-			logger.debug("addListenerProxy() Attaching for creationComplete");
+			logger.debug("addListenerProxy() Attaching listener for all  'creationComplete' event");
 			
 
 			return listenerProxy;
@@ -319,16 +344,15 @@ package com.asfusion.mate.l10n.maps
 		// ************************************************************************************************
 		
 		protected function onLoadLocale(event:LocaleEvent):void {
+			// Make sure the logger is configured...
+			configureLogging(_debugEnabled);
+			
 			// Notify any listeners that a locale switch will happen next!
 			dispatchEvent(new LocaleMapEvent(LocaleMapEvent.LOCALE_CHANGING));
-			
-			var cmd : ILocaleCommand = _commandFactory.newInstance() as ILocaleCommand;
-			if ((cmd is LocaleCommand) && (LocaleCommand(cmd).log == null)) {
-				// Attach customized logger
-				LocaleCommand(cmd).log = LocaleLogger.getLogger(cmd, true);	
-			}
+			logger.debug("onLoadLocale() announce 'changing' locale");
 			
 			// Delegate the event processing to the ILocaleCommand instance
+			var cmd : ILocaleCommand = _commandFactory.newInstance() as ILocaleCommand;
 			if (cmd != null) cmd.execute(event);
 			else  			 logger.error(ERROR_INVALID_COMMAND_INSTANCE);
 		}
@@ -338,7 +362,10 @@ package com.asfusion.mate.l10n.maps
 		 * This method fires an event announcing that a target instance is READY (creationComplete).
 		*/
 		protected function onCreationComplete_Target(event:InjectorEvent, logIt:Boolean=true):void {
-			if (logIt == true) logger.debug("onCreationComplete_Target() for '{0}'",event.uid);
+			if (logIt == true) {
+				var id : String = (event.uid != null) ? event.uid : getQualifiedClassName(event.injectorTarget); 
+				logger.debug("onCreationComplete_Target() for '{0}'",id);	
+			}
 			dispatchEvent(new LocaleMapEvent(LocaleMapEvent.TARGET_READY, event.injectorTarget));
 		}
 
@@ -362,14 +389,35 @@ package com.asfusion.mate.l10n.maps
 		
 		
 		// ************************************************************************************************
-		//  Private Attributes
+		//  Private Logging features 
 		// ************************************************************************************************
 		 
+		private function configureLogging(val:Boolean):void {
+			if (_commandFactory is StaticClassFactory) {
+				
+				if (val && StaticClassFactory(_commandFactory).properties==null) {
+					// Attach customized logger
+					if (_logTarget == null) this.logTarget = new StaticClassFactory(TraceTarget,{level:LogEventLevel.DEBUG}); 
+					
+					var clazz : Class = StaticClassFactory(_commandFactory).source;
+					StaticClassFactory(_commandFactory).properties = {log:LocaleLogger.getLogger(clazz, _isCustomFactory)}	
+				} else if (val == false) {
+					StaticClassFactory(_commandFactory).properties = null;
+				}
+			}
+		}
 		
+				
 		private function get logger():ILogger {
 			return LocaleLogger.getLogger(this, false);
 		}
+		private var _logTarget                  :ILoggingTarget = null;
+		private var _debugEnabled				:Boolean = false;
 		
+		// ************************************************************************************************
+		//  Private Attributes
+		// ************************************************************************************************
+
 		protected var targetsRegistered			:Boolean = false;
 		protected var includeDerivativesChanged	:Boolean = false;
 
@@ -381,7 +429,8 @@ package com.asfusion.mate.l10n.maps
 		private var _dispatcher 				:GlobalDispatcher 	= new GlobalDispatcher();
 		private var _listenerProxies			:Dictionary 		= new Dictionary(true);
 
-		private var _commandFactory 			:IFactory 			= new ClassFactory(LocaleCommand);
+		private var _commandFactory 			:IFactory 			= new StaticClassFactory(LocaleCommand);
+		private var _isCustomFactory            :Boolean            = false;
 		
 		private namespace self;
 		

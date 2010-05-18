@@ -73,6 +73,10 @@ package com.asfusion.mate.utils.factory {
 			return _wrappedClassFactory;
 		}
 		
+		
+		public function get source():Class {
+			return _wrappedClassFactory.generator;
+		}
 		/**
 		 * Mutator for use by constructor and useful as MXML tag attribute;
 		 * e.g.  generator="{new TraceTarget()}"

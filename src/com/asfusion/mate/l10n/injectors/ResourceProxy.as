@@ -76,8 +76,6 @@ package com.asfusion.mate.l10n.injectors
 				}
 				
 				super.target = src;
-				
-				dispatchEvent(PropertyChangeEvent.createUpdateEvent(this,"target",oldVal,src));
 			}
 		}
 

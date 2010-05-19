@@ -273,6 +273,7 @@ package com.asfusion.mate.l10n.injectors
 			// the instance is a derivative of the target Class
 			if (shouldCacheInstance(inst) == true) {
 				
+				log.debug("onInstanceCreationComplete({0})",getQualifiedClassName(event.targetInst));
 				// trace("adding smartcache: " + inst["id"]);
 				
 				// For current instance, iterate proxies and update target property
@@ -297,6 +298,7 @@ package com.asfusion.mate.l10n.injectors
 	     * 
 	     */
 	    override protected function onTargetStateChange(event:StateChangeEvent):void {
+				log.debug("onTargetStateChange({0})",event.newState);
 	    		validateNow(event.target);
 	    }
 	    

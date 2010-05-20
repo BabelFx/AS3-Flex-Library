@@ -67,17 +67,22 @@ package com.asfusion.mate.l10n.injectors
 		  * Class whose instances should be used to trigger this injector to process and 
 		  * injector resource bundle settings 
 		  */
-		 public function get target() : Class {
+		 public function get target() : Object {
 		 	return _target;
 		 }   
-		 public function set target(src:Class):void {
+		 public function set target(src:Object):void {
 		 	if (src != _target) {
-		 		_target = src;
-		 		
-			 	// Register class with LocaleMap, to be notified of creationComplete for instances
-				if (_target && map) map.addTarget(_target);
+				if (src is Class) {
+			 		_target = src as Class;
+			 		
+				 	// Register class with LocaleMap, to be notified of creationComplete for instances
+					if (_target && map) map.addTarget(_target);
+				} else {
+					configureInstance(src);
+				}
 			}
 		 }
+		 
 		 private var _target : Class = null;
 		 
 		 
@@ -114,7 +119,7 @@ package com.asfusion.mate.l10n.injectors
 	      * @param bundleName
 	      * 
 	      */
-	     public function SmartResourceInjector( target       : Class           = null, 
+	     public function SmartResourceInjector( target       : Object           = null, 
 	     										bundleName   : String          = "", 
 	     										localeManager: IResourceManager= null, 
 	     										map          : LocaleMap  = null)  {
@@ -147,6 +152,13 @@ package com.asfusion.mate.l10n.injectors
 	   	 	// The map owner is usually a mx.core.Container
 	   	 	super.initialized(parent.owner,id);
 			this.map = parent;
+			
+			// Properly init target instances if not already configured...
+			if ((target == null) && (_instances.length > 0)) {
+				for each (var it:Object in _instances) {
+					configureInstance(it);
+				}
+			}
 	   	 } 
 		
 		
@@ -269,24 +281,11 @@ package com.asfusion.mate.l10n.injectors
 		protected function onInstanceCreationComplete(event:LocaleMapEvent):void {
 			var inst : Object = event.targetInst;
 			
-			// If this Injector instance still has a target AND 
-			// the instance is a derivative of the target Class
-			if (shouldCacheInstance(inst) == true) {
-				
+			// If this Injector instance still has a target AND the instance is a derivative of the target Class
+			if (inst && shouldCacheInstance(inst) == true) {
 				log.debug("onInstanceCreationComplete({0})",getQualifiedClassName(event.targetInst));
-				// trace("adding smartcache: " + inst["id"]);
 				
-				// For current instance, iterate proxies and update target property
-				_instances.push(inst);
-				validateNow(inst);
-				
-				// Do any of the registry items want injection during state changes
-				if (_listenForStateChanges == true){
-					if (inst is IEventDispatcher) {
-						IEventDispatcher(inst).addEventListener(StateChangeEvent.CURRENT_STATE_CHANGE,onTargetStateChange,false,0,true);
-					} 
-				}
-
+				configureInstance(inst);
 			}
 		}	  
 
@@ -416,7 +415,7 @@ package com.asfusion.mate.l10n.injectors
 						if (proxy == null) continue;		
 						
 						if (
-							  ((proxy.target == null) && (target is Class)       && (inst is target))       || 
+							  ((proxy.target == null) && (target is Class)       && (inst is Class(target)))       || 
 							  ((proxy.target != null) && (proxy.target is Class) && (inst is Class(proxy.target)))
 						   ){
 							// When targetID is specified, only cache if ID matches 
@@ -433,13 +432,29 @@ package com.asfusion.mate.l10n.injectors
 				} else {
 					// Rare case where no proxies are specified, but a targetClass is still specified...
 					// Useful to trigger localChange events
-					if (target && (target is Class) && (inst is target)) results = true;
+					if (target && (target is Class) && (inst is Class(target))) results = true;
 				}
 			}
 				
 			return results;
 		}
 		
+		 private function configureInstance(src:Object):void {
+			if (src == null) return;
+			
+			// For current instance, iterate proxies and update target property
+			if (_instances.indexOf(src) < 0) {
+				_instances.push(src);
+				validateNow(src);
+			}
+			
+			// Do any of the registry items want injection during state changes
+			if (_listenForStateChanges && (src is IEventDispatcher)) {
+				IEventDispatcher(src).addEventListener(StateChangeEvent.CURRENT_STATE_CHANGE,onTargetStateChange,false,0,true);
+			}
+		 }
+	
+
 		// *********************************************************************************
 	    //  Private Attributes
 	    // *********************************************************************************

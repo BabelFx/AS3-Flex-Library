@@ -4,6 +4,7 @@ package com.asfusion.mate.l10n.events
 
 	public class LocaleMapEvent extends Event
 	{	
+		public static const INITIALIZED     :String = "initialized";
 		public static const TARGET_READY  	:String = "targetReady";
 		public static const LOCALE_CHANGING	:String = "localeChanging";
 

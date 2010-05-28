@@ -26,6 +26,7 @@ package com.asfusion.mate.l10n.maps
 	import mx.core.IMXMLObject;
 	import mx.core.UIComponent;
 	import mx.events.FlexEvent;
+	import mx.events.PropertyChangeEvent;
 
 	public class AbstractMap extends EventDispatcher implements IMXMLObject
 	{
@@ -41,8 +42,10 @@ package com.asfusion.mate.l10n.maps
 	   	 	// Make sure the owner has finished creating all children to insure that calls to the 'function set registry()' 
 	   	 	// is performed with values that are initialized properly in the owner.
 	   	 	_owner = document as UIComponent;
+			dispatchEvent(PropertyChangeEvent.createUpdateEvent(this,"owner",null,_owner));
 		}
 		
+		[Bindable("propertyChange")]
 		public function get owner():UIComponent {
 			return _owner;
 		}

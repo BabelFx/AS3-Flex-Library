@@ -24,14 +24,12 @@ package com.asfusion.mate.l10n.injectors
 	 
 	 import flash.events.Event;
 	 import flash.events.IEventDispatcher;
-	 import flash.utils.Dictionary;
 	 import flash.utils.getQualifiedClassName;
 	 
 	 import mx.collections.ArrayCollection;
 	 import mx.events.PropertyChangeEvent;
 	 import mx.events.StateChangeEvent;
 	 import mx.resources.IResourceManager;
-	 import mx.utils.ObjectProxy;
 
 	/**
 	 * Sample MXML Usage.

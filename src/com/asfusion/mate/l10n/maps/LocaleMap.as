@@ -29,6 +29,7 @@ package com.asfusion.mate.l10n.maps
 	import com.asfusion.mate.utils.debug.LocaleLogger;
 	import com.asfusion.mate.utils.factory.StaticClassFactory;
 	
+	import flash.events.Event;
 	import flash.events.IEventDispatcher;
 	import flash.utils.Dictionary;
 	import flash.utils.getQualifiedClassName;
@@ -45,6 +46,7 @@ package com.asfusion.mate.l10n.maps
 
 	[Event(name='localeChanging',type='com.asfusion.mate.l10n.events.LocaleMapEvent')]
 	[Event(name='targetReady',	 type='com.asfusion.mate.l10n.events.LocaleMapEvent')]
+	[Event(name='initialized',   type='com.asfusion.mate.l10n.events.LocaleMapEvent')]
 	
 	public class LocaleMap extends AbstractMap  {
 		
@@ -229,6 +231,8 @@ package com.asfusion.mate.l10n.maps
 			_isInitialized = true;
 			
 			commitProperties();
+			
+			dispatchEvent(new LocaleMapEvent(LocaleMapEvent.INITIALIZED, document));
 		}
 		
 		// ************************************************************************************************

@@ -500,14 +500,31 @@ package com.asfusion.mate.l10n.injectors
 			 
 					 function listenStateChanges(map:ResourceMap):UIComponent {
 						 // If trigger is NOT specified, use parent of target
-						 var ui  : UIComponent  = (map.trigger ? map.trigger : map.target) as UIComponent;
+						 var ui  : UIComponent  = (map.trigger ? map.trigger : scanForTrigger(map.target)) as UIComponent;
 						 if (ui != null) {
+							 
 							 if (ui.willTrigger(StateChangeEvent.CURRENT_STATE_CHANGE) != true) {
 							 	ui.addEventListener(StateChangeEvent.CURRENT_STATE_CHANGE, onTargetStateChange,false,0,true);
+								
+								var clazzName : String = getQualifiedClassName(ui); 
+								log.debug("listenStateChanges() for trigger='{0}',name='{1}'",clazzName,ui.name);
 							 }
 						 }
 						 return ui;
 					 }
+					 
+					 // Scan up the target -> parent hierarchy for any 
+					 function scanForTrigger(src:Object):UIComponent {
+						 var results :UIComponent = null;
+						 if (src && src is UIComponent) {
+							 var ui : UIComponent = src as UIComponent;
+							 
+							 results = (ui.states.length > 0) ? ui : scanForTrigger(ui.parent);
+						 }
+						 
+						 return results;
+					 }
+					 
 					 
 			 if (desiredState!="") {
 				 var ui : UIComponent = listenStateChanges(map);

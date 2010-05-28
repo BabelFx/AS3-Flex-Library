@@ -1,15 +1,12 @@
-package com.asfusion.mate.l10n.commands
+package com.mindspace.l10n.commands
 {
-	import com.asfusion.mate.l10n.events.LocaleEvent;
+	import com.mindspace.l10n.events.LocaleEvent;
 	
 	import flash.events.IEventDispatcher;
 	import flash.net.*;
-	import flash.system.Capabilities;
 	
 	import mx.events.ResourceEvent;
 	import mx.managers.*;
-	import mx.resources.IResourceManager;
-	import mx.resources.ResourceManager;
 	import mx.utils.StringUtil;
 	
 	

@@ -1,10 +1,10 @@
 package com.asfusion.mate.utils.binding
 {
+	import flash.events.Event;
+	import flash.events.IEventDispatcher;
+	
 	import mx.core.EventPriority;
 	import mx.events.PropertyChangeEvent;
-	import flash.events.IEventDispatcher;
-	import flash.events.Event;
-	import mx.binding.BindabilityInfo;
 	import mx.utils.DescribeTypeCache;
 	
 	public class SoftChangeWatcher

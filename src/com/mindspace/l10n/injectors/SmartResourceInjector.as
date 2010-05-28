@@ -17,10 +17,14 @@ Author: Thomas Burleson, Principal Architect
                 
 @ignore
 */
-package com.asfusion.mate.l10n.injectors
+package com.mindspace.l10n.injectors
 {
-	 import com.asfusion.mate.l10n.events.LocaleMapEvent;
-	 import com.asfusion.mate.l10n.maps.LocaleMap;
+	 import com.mindspace.l10n.events.LocaleMapEvent;
+	 import com.mindspace.l10n.maps.LocaleMap;
+	 import com.mindspace.l10n.proxys.ITargetInjectable;
+	 import com.mindspace.l10n.proxys.PropertyProxy;
+	 import com.mindspace.l10n.proxys.ResourceMap;
+	 import com.mindspace.l10n.proxys.ResourceProxy;
 	 
 	 import flash.events.Event;
 	 import flash.events.IEventDispatcher;

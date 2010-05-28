@@ -1,4 +1,4 @@
-package com.asfusion.mate.l10n.events
+package com.mindspace.l10n.events
 {
 	import flash.events.Event;
 	

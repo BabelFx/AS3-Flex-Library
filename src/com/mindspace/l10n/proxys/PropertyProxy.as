@@ -17,16 +17,17 @@ Author: Thomas Burleson, Principal Architect
                 
 @ignore
 */
-package com.asfusion.mate.l10n.injectors 
+package com.mindspace.l10n.proxys 
 {
 	import com.asfusion.mate.core.Binder;
-	import com.asfusion.mate.utils.InjectorUtils;
+	import com.mindspace.l10n.utils.InjectorUtils;
 	
 	import flash.events.IEventDispatcher;
 	import flash.utils.Dictionary;
 	
 	import mx.core.IMXMLObject;
 	import mx.utils.StringUtil;
+	import com.mindspace.l10n.injectors.SmartResourceInjector;
 
 	/**
 	 * PropertyProxy sets a value from an object (source) to a destination (target). 
@@ -36,7 +37,7 @@ package com.asfusion.mate.l10n.injectors 
 	 * If the source key is bindable, the PropertyProxy will bind  
 	 * the source to the targetKey. Otherwise, it will only set the property once.
 	 */
-	public class PropertyProxy implements IMXMLObject, com.asfusion.mate.l10n.injectors.ITargetInjectable
+	public class PropertyProxy implements IMXMLObject, com.mindspace.l10n.proxys.ITargetInjectable
 	{
 		
 		// ************************************************************************************************************
@@ -224,7 +225,7 @@ package com.asfusion.mate.l10n.injectors 
 		 * @param val Owning instance of SmartResourceInjector
 		 * 
 		 */
-		internal function set owner(val : SmartResourceInjector):void {
+		public function set owner(val : SmartResourceInjector):void {
 			if (val != _owner) {
 				_owner = val;
 				notifyOwner();

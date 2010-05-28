@@ -17,14 +17,11 @@ Author: Thomas Burleson, Principal Architect
                 
 @ignore
 */
-package com.asfusion.mate.utils
+package com.mindspace.l10n.utils
 {
 	import flash.utils.Dictionary;
 	import flash.utils.getDefinitionByName;
 	import flash.utils.getQualifiedClassName;
-	
-	import mx.core.UIComponent;
-	import mx.utils.StringUtil;
 	
 	public class InjectorUtils
 	{

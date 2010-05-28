@@ -8,7 +8,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-package com.asfusion.mate.utils.factory {
+package com.mindspace.l10n.utils.factory {
 	/**
 	 *  UIStaticClassFactory is an implementation of the Class Factory design pattern
 	 *  for dynamic creaion of UI components. It allows dynamic passing of the 
@@ -24,14 +24,10 @@ package com.asfusion.mate.utils.factory {
 	import flash.utils.describeType;
 	import flash.utils.getDefinitionByName;
 	
-	import mx.controls.dataGridClasses.DataGridColumn;
 	import mx.core.ClassFactory;
 	import mx.core.IFactory;
-	import mx.events.FlexEvent;
 	import mx.logging.ILogger;
 	import mx.logging.Log;
-	import mx.logging.LogEventLevel;
-	import mx.styles.StyleProxy;
 
 
 	public class StaticClassFactory implements IFactory{

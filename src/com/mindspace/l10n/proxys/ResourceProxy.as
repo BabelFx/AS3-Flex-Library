@@ -17,7 +17,7 @@ Author: Thomas Burleson, Principal Architect
                 
 @ignore
 */
-package com.asfusion.mate.l10n.injectors
+package com.mindspace.l10n.proxys
 {
 	import flash.events.Event;
 	import flash.events.EventDispatcher;

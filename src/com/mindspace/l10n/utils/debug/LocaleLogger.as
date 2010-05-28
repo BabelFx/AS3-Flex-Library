@@ -1,4 +1,4 @@
-package com.asfusion.mate.utils.debug
+package com.mindspace.l10n.utils.debug
 {
 	import flash.events.EventDispatcher;
 	import flash.utils.Dictionary;

@@ -17,12 +17,14 @@ Author: Thomas Burleson, Principal Architect
                 
 @ignore
 */
-package com.asfusion.mate.l10n.injectors
+package com.mindspace.l10n.injectors
 {
-	 import com.asfusion.mate.l10n.events.LocaleMapEvent;
-	 import com.asfusion.mate.l10n.maps.LocaleMap;
-	 import com.asfusion.mate.utils.InjectorUtils;
-	 import com.asfusion.mate.utils.debug.LocaleLogger;
+	 import com.mindspace.l10n.events.LocaleMapEvent;
+	 import com.mindspace.l10n.maps.LocaleMap;
+	 import com.mindspace.l10n.proxys.ResourceMap;
+	 import com.mindspace.l10n.proxys.ResourceProxy;
+	 import com.mindspace.l10n.utils.InjectorUtils;
+	 import com.mindspace.l10n.utils.debug.LocaleLogger;
 	 
 	 import flash.events.Event;
 	 import flash.events.EventDispatcher;
@@ -66,9 +68,10 @@ package com.asfusion.mate.l10n.injectors
 		 public var id         : String = "";
 		 public var bundleName : String = ""; 
 			
+		 [ArrayElementType( "Object" )]
 		 /**
 		  * Add one or more items to the ResourceInjector registry.
-		  * @param target
+		  * ([ArrayElementType( "Object" )] metadata is to avoid http://j.mp/FB-12316)
 		  * 
 		  */
 	     protected function get registry():Object {

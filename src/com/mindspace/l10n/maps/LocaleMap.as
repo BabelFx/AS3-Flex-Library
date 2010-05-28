@@ -17,36 +17,33 @@ Author: Thomas Burleson, Principal Architect
                 
 @ignore
 */
-package com.asfusion.mate.l10n.maps
+package com.mindspace.l10n.maps
 {
 	import com.asfusion.mate.core.GlobalDispatcher;
 	import com.asfusion.mate.core.ListenerProxy;
 	import com.asfusion.mate.events.InjectorEvent;
-	import com.asfusion.mate.l10n.commands.ILocaleCommand;
-	import com.asfusion.mate.l10n.commands.LocaleCommand;
-	import com.asfusion.mate.l10n.events.*;
-	import com.asfusion.mate.utils.InjectorUtils;
-	import com.asfusion.mate.utils.debug.LocaleLogger;
-	import com.asfusion.mate.utils.factory.StaticClassFactory;
+	import com.mindspace.l10n.commands.ILocaleCommand;
+	import com.mindspace.l10n.commands.LocaleCommand;
+	import com.mindspace.l10n.events.*;
+	import com.mindspace.l10n.utils.InjectorUtils;
+	import com.mindspace.l10n.utils.debug.LocaleLogger;
+	import com.mindspace.l10n.utils.factory.StaticClassFactory;
 	
 	import flash.events.Event;
 	import flash.events.IEventDispatcher;
 	import flash.utils.Dictionary;
 	import flash.utils.getQualifiedClassName;
 	
-	import mx.core.ClassFactory;
 	import mx.core.IFactory;
 	import mx.events.FlexEvent;
 	import mx.logging.ILogger;
 	import mx.logging.ILoggingTarget;
-	import mx.logging.Log;
 	import mx.logging.LogEventLevel;
 	import mx.logging.targets.TraceTarget;
-	import mx.utils.StringUtil;
 
-	[Event(name='localeChanging',type='com.asfusion.mate.l10n.events.LocaleMapEvent')]
-	[Event(name='targetReady',	 type='com.asfusion.mate.l10n.events.LocaleMapEvent')]
-	[Event(name='initialized',   type='com.asfusion.mate.l10n.events.LocaleMapEvent')]
+	[Event(name='localeChanging',type='com.mindspace.l10n.events.LocaleMapEvent')]
+	[Event(name='targetReady',	 type='com.mindspace.l10n.events.LocaleMapEvent')]
+	[Event(name='initialized',   type='com.mindspace.l10n.events.LocaleMapEvent')]
 	
 	public class LocaleMap extends AbstractMap  {
 		
@@ -365,31 +362,40 @@ package com.asfusion.mate.l10n.maps
 		 * Called by the dispacher when the event gets triggered.
 		 * This method fires an event announcing that a target instance is READY (creationComplete).
 		*/
-		protected function onCreationComplete_Target(event:InjectorEvent, logIt:Boolean=true):void {
+		protected function onCreationComplete_Target(event:Event, logIt:Boolean=true):void {
+			var injectorTarget 	: Object = kevValueFrom(event,"injectorTarget") as Object;
+			var uid			 	: *      = kevValueFrom(event,"uid");
+			
 			if (logIt == true) {
-				var id : String = (event.uid != null) ? event.uid : getQualifiedClassName(event.injectorTarget); 
+				var id 			: String = (uid != null) ? uid : getQualifiedClassName(injectorTarget); 
 				logger.debug("onCreationComplete_Target() for '{0}'",id);	
 			}
-			dispatchEvent(new LocaleMapEvent(LocaleMapEvent.TARGET_READY, event.injectorTarget));
+			dispatchEvent(new LocaleMapEvent(LocaleMapEvent.TARGET_READY, injectorTarget));
 		}
 
 		/**
 		 * This function is a handler for the injection event, if the target it is a 
 		 * derivative class the injection gets triggered
 		 */ 
-		protected function onCreationComplete_Derivative( event:InjectorEvent ):void
-		{
+		protected function onCreationComplete_Derivative( event:Event ):void {
+			var injectorTarget 	: Object = kevValueFrom(event,"injectorTarget") as Object;
+			var uid			 	: *      = kevValueFrom(event,"uid");
+			
 			if( _targets ) {
 				for each( var currentTarget:* in _targets) {
-					var isDerivative : Boolean = InjectorUtils.isDerivative( event.injectorTarget, currentTarget  );
+					var isDerivative : Boolean = InjectorUtils.isDerivative( injectorTarget, currentTarget  );
 					
 					if( isDerivative == true )   {
-						logger.debug("onCreationComplete_Derivative() for '{0}'",event.uid);
+						logger.debug("onCreationComplete_Derivative() for '{0}'", uid);
 						onCreationComplete_Target( event, false );				
 					}
 				}
 			}
 		}
+		
+			private function kevValueFrom(event:Event,key:String):* {
+				return (event && event.hasOwnProperty(key)) ? event[key] : null;
+			}
 		
 		
 		// ************************************************************************************************

@@ -17,12 +17,11 @@ Author: Thomas Burleson, Principal Architect
                 
 @ignore
 */
-package com.asfusion.mate.l10n.injectors
+package com.mindspace.l10n.proxys
 {
 	
 	
 	[ExcludeClass]
-	
 	/**
 	 * Identifies property on target that should be updated by resourceKey value in "bundleName"; when the locale changes.
 	 * This class allows target-level mappings so the ResourceInjector can use multiple bundles within any instantiation.
@@ -30,7 +29,7 @@ package com.asfusion.mate.l10n.injectors
 	 * @author thomasburleson
 	 * 
 	 */
-	internal class ResourceMap implements ITargetInjectable {
+	public class ResourceMap implements ITargetInjectable {
 		public var bundleName  : String = "";
 		public var key 		   : String = "";	// must be unique for any ResourceInjector
 

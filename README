@@ -1,21 +1,23 @@
 Multi-language (l10n) Injection for Flex 
 
-Combining IoC concepts with the power of MXML, this library provides a powerful, easy framework for run-time injection of localized
-resources (strings, bitmaps, skins, etc.) into Flex GUI views and non-DisplayObject models and business classes. This solution can be 
-used with ANY framework within Flex 3 or Flex 4 and has been tested with sample applications using Swiz, Cairngorm, Mate, or no 
-application framework at all. 
+Combining IoC concepts with the power of MXML, this library provides a powerful, easy framework for run-time 
+injection of localized resources (strings, bitmaps, skins, etc.) into Flex GUI views and non-DisplayObject models 
+and business classes. This solution can be used with ANY framework within Flex 3 or Flex 4 and has been tested 
+with sample applications using Swiz, Cairngorm, Mate, or no application framework at all. 
 
-Simple rebuild or include the l10nInjection.swc in your custom project, create a custom LocalizationMap, add an instance of that 
-LocalizationMap to your application and your immediately have multi-language support. Using a single LocalizationMap instance, 
-developers can centralize all mappings of localized resources to specific destinations and usages. Whenever the locale changes, 
-resources are re-injected into specified destinations. In fact the l10nInjection can occur upon locale changes, model changes, view state 
-changes, or GUI instantiations... full power for all your needs. The l10nInjection solution can be used:
+Simple rebuild or include the l10nInjection.swc in your custom project, create a custom LocalizationMap, add an 
+instance of that LocalizationMap to your application and your immediately have multi-language support. Using a 
+single LocalizationMap instance, developers can centralize all mappings of localized resources to specific 
+destinations and usages. Whenever the locale changes, resources are re-injected into specified destinations. In fact 
+the l10nInjection can occur upon locale changes, model changes, view state changes, or GUI instantiations... 
+full power for all your needs. The l10nInjection solution can be used:
 
     Within custom Flex 3 or Flex 4 solutions 
     Within AIR deployments or Web-only solutions. 
     Within modules or applications.
 
-Please review the WIKI docs and blogs at http://www.gridlinked.info for details and tutorials. This GIT repository contains the both: 
+Please review the WIKI docs and blogs at http://www.gridlinked.info for details and tutorials. This GIT repository 
+contains the both: 
 
    1) the source code for the l10nInjection.swc flex library, and 
    2) the FlashBuilder 4 Flex library project settings  

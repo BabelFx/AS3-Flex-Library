@@ -48,6 +48,8 @@ package com.mindspace.l10n.proxys
 
 		public var property    : String = "";
 		public var state       : String = "";		// view state applicable; default === ""
+		
+		[Inspectable(name="type",type="string",enumeration="string,boolean,uint,int,object,array,class",defaultValue="string")]
 		public var type        : String = "string";
 		
 		public function ResourceMap(target:Object, key:String, property:String, state:String="", type:String="string", parameters:Array=null, bundleName:String="") {

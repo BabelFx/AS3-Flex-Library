@@ -28,6 +28,7 @@ package com.mindspace.l10n.injectors
 	 
 	 import flash.events.Event;
 	 import flash.events.IEventDispatcher;
+	 import flash.utils.getDefinitionByName;
 	 import flash.utils.getQualifiedClassName;
 	 
 	 import mx.collections.ArrayCollection;
@@ -80,6 +81,14 @@ package com.mindspace.l10n.injectors
 				 	// Register class with LocaleMap, to be notified of creationComplete for instances
 					if (_target && map) map.addTarget(_target);
 				} else {
+					// We have a target instance instead of a target Class...
+					// use it but also register its Class for future instantiations...
+					var qualifiedName : String = getQualifiedClassName(src);
+					var clazz 		  : Class  = getDefinitionByName(qualifiedName) as Class;
+					
+					_target = clazz;
+					if (map != null) map.addTarget(clazz);
+					
 					configureInstance(src);
 				}
 			}

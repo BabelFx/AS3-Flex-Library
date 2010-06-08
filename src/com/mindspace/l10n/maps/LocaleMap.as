@@ -279,9 +279,13 @@ package com.mindspace.l10n.maps
 		// ************************************************************************************************
 		
 		protected function listenForCreationComplete(active:Boolean = true):void {
-
+			
+			
 			if (active == true) addListenerProxy   ( _dispatcher, FlexEvent.CREATION_COMPLETE );
-			else 				removeListenerProxy( _dispatcher, FlexEvent.CREATION_COMPLETE );
+			else 				{
+				removeListenerProxy( _dispatcher, FlexEvent.CREATION_COMPLETE );
+				logger.error("listenForCreationComplete() disabled because no targets are available. Locale changes and injectors will not work properly");
+			}
 			
 			if (active == true) {
 				_dispatcher.addEventListener(LocaleEvent.EVENT_ID,onLoadLocale,false,0,true);

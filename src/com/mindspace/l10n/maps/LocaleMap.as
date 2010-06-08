@@ -307,7 +307,7 @@ package com.mindspace.l10n.maps
 			listenerProxy.addListener((type == null) ? "creationComplete" : type, 
 									  (type == null) ? this 			  : null );
 
-			logger.debug("addListenerProxy() Attaching listener for all  'creationComplete' event");
+			logger.debug("addListenerProxy() Attaching global listener for all GUI 'creationComplete' events");
 			
 
 			return listenerProxy;
@@ -347,15 +347,19 @@ package com.mindspace.l10n.maps
 		protected function onLoadLocale(event:LocaleEvent):void {
 			// Make sure the logger is configured...
 			configureLogging(_debugEnabled);
+			logger.debug("onLoadLocale() request for {0}",event.action);
 			
-			// Notify any listeners that a locale switch will happen next!
-			dispatchEvent(new LocaleMapEvent(LocaleMapEvent.LOCALE_CHANGING));
-			logger.debug("onLoadLocale() announce 'changing' locale");
-			
-			// Delegate the event processing to the ILocaleCommand instance
-			var cmd : ILocaleCommand = _commandFactory.newInstance() as ILocaleCommand;
-			if (cmd != null) cmd.execute(event);
-			else  			 logger.error(ERROR_INVALID_COMMAND_INSTANCE);
+			if (event.action == LocaleEvent.LOAD_LOCALE) {
+				
+				// Notify any listeners that a locale switch will happen next!
+				dispatchEvent(new LocaleMapEvent(LocaleMapEvent.LOCALE_CHANGING));
+				logger.debug("onLoadLocale() announce 'changing' locale");
+				
+				// Delegate the event processing to the ILocaleCommand instance
+				var cmd : ILocaleCommand = _commandFactory.newInstance() as ILocaleCommand;
+				if (cmd != null) cmd.execute(event);
+				else  			 logger.error(ERROR_INVALID_COMMAND_INSTANCE);
+			}
 		}
 		
 		/**

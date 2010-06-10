@@ -43,14 +43,15 @@ package com.mindspace.l10n.utils.debug
 			return logger;
 		}
 		
-		public static function addLoggingTarget( it:ILoggingTarget ):void
-		{
+		public static function addLoggingTarget( it:ILoggingTarget ):void {
+			loggingTargets ||= [];
+			
 			if (it == null) return;
 			
-			initializeTarget(it);
-			
-			loggingTargets ||= [];
-			if( loggingTargets.indexOf( it ) < 0 ) loggingTargets.push( it );
+			if( loggingTargets.indexOf( it ) < 0 ) {
+				initializeTarget(it);
+				loggingTargets.push( it );
+			}
 			
 			if( loggers != null ) {
 				
@@ -61,6 +62,19 @@ package com.mindspace.l10n.utils.debug
 			}
 		}
 		
+		
+		public static function removeLoggingTarget(it:ILoggingTarget):void {
+			if (it == null) return;
+			
+			if( loggingTargets.indexOf( it ) >= 0 ) {
+				
+				for each( var logger:ILogger in loggers ) {
+					if( categoryMatchInFilterList( logger.category, it.filters ) ) {
+						it.removeLogger( logger );
+					}
+				}
+			}
+		}
 		
 		/**
 		 *  This method checks that the specified category matches any of the filter

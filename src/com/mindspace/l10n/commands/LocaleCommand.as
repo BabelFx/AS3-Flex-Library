@@ -1,6 +1,7 @@
 package com.mindspace.l10n.commands
 {
 	import com.mindspace.l10n.events.LocaleEvent;
+	import com.mindspace.l10n.utils.debug.LocaleLogger;
 	
 	import flash.net.*;
 	import flash.system.Capabilities;
@@ -10,10 +11,9 @@ package com.mindspace.l10n.commands
 	import mx.resources.IResourceManager;
 	import mx.resources.ResourceManager;
 	
-	public class LocaleCommand implements ILocaleCommand
-	{	
+	public class LocaleCommand implements ILocaleCommand {	
 		
-		public var log : ILogger = null;
+		public var log : ILogger = LocaleLogger.getLogger(this, false);
 		
 		public function execute( event:LocaleEvent ):void {
 			

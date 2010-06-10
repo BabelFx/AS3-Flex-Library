@@ -51,12 +51,20 @@ package com.mindspace.l10n.maps
 		//  Public Properties
 		// ************************************************************************************************
 		
+		[Bindable]
+		public function get enableLog():Boolean {
+			return _debugEnabled;
+		}
 		public function set enableLog(val:Boolean):void {
 			_debugEnabled = val;
 			
-			if (val && !_logTarget) {
-				// Attach customized logger
-				this.logTarget = new StaticClassFactory(TraceTarget,{level:LogEventLevel.DEBUG});
+			if (val == true) {
+				// Attach existing or new customized _logger
+				this.logTarget = _logTarget ? _logTarget : new StaticClassFactory(TraceTarget,{level:LogEventLevel.DEBUG});		
+				
+			} else if (!val && (_logTarget !=null)) {
+				// Disable any logging for now...
+				LocaleLogger.removeLoggingTarget(_logTarget);
 			}
 		}
 		
@@ -106,7 +114,7 @@ package com.mindspace.l10n.maps
 				// Use internal default locale switcher command 
 				// LocaleCommand does not load external bundles, instead it simply switches embedded locales
 				_commandFactory = new StaticClassFactory(LocaleCommand);
-				logger.error(ERROR_INVALID_FACTORY);
+				_logger.error(ERROR_INVALID_FACTORY);
 			}
 			
 			_isCustomFactory = true;
@@ -258,7 +266,7 @@ package com.mindspace.l10n.maps
 				{
 					var currentType:String = ( currentTarget is Class) ? getQualifiedClassName(currentTarget) : currentTarget;
 					_dispatcher.removeEventListener(currentType, onCreationComplete_Target);
-					logger.debug("unregisterAll() target {0}",currentType);
+					_logger.debug("unregisterAll() target {0}",currentType);
 				}
 				targetsRegistered = false;
 			}
@@ -269,7 +277,7 @@ package com.mindspace.l10n.maps
 			
 			if (currentType && currentType != "") {
 				_dispatcher.addEventListener( currentType, onCreationComplete_Target, false, 0, true);
-				logger.debug("register({0})",currentType);
+				_logger.debug("register({0})",currentType);
 			}
 		}
 		
@@ -283,12 +291,9 @@ package com.mindspace.l10n.maps
 			
 			if (active == true) {
 				addListenerProxy( _dispatcher, FlexEvent.CREATION_COMPLETE );
-				//addListenerProxy( _dispatcher, FlexEvent.CONTENT_CREATION_COMPLETE ); 
 			}
 			else 				{
 				removeListenerProxy( _dispatcher, FlexEvent.CREATION_COMPLETE );
-				removeListenerProxy( _dispatcher, FlexEvent.CONTENT_CREATION_COMPLETE ); 
-				logger.error("listenForCreationComplete() disabled because no targets are available. Locale changes and injectors will not work properly");
 			}
 			
 			if (active == true) {
@@ -315,7 +320,7 @@ package com.mindspace.l10n.maps
 			listenerProxy.addListener((type == null) ? "creationComplete" : type, 
 									  (type == null) ? this 			  : null );
 
-			logger.debug("addListenerProxy() Attaching global listener for all GUI '{0}' events", type);
+			_logger.debug("addListenerProxy() Attaching global listener for all GUI '{0}' events", type);
 			
 
 			return listenerProxy;
@@ -327,7 +332,7 @@ package com.mindspace.l10n.maps
 			if(listenerProxy && type && (type != "")) {
 				listenerProxy.removeListener(type);
 				delete _listenerProxies[eventDispatcher];
-				logger.debug("removeListenerProxy() for creationComplete");			
+				_logger.debug("removeListenerProxy() Detaching global listener for all GUI '{0}' events", type);	
 			}	
 		}
 		
@@ -338,10 +343,10 @@ package com.mindspace.l10n.maps
 				includeDerivativesChanged = false;
 				
 				if(includeDerivatives && active) {
-					logger.debug("listenForDerivatives() Attaching listener for Derivative creationComplete");
+					_logger.debug("listenForDerivatives() Attaching listener for Derivative creationComplete");
 					_dispatcher.addEventListener( InjectorEvent.INJECT_DERIVATIVES, onCreationComplete_Derivative, false, 0, true);
 				} else {
-					logger.debug("listenForDerivatives() Removing listener for Derivative creationComplete");
+					_logger.debug("listenForDerivatives() Removing listener for Derivative creationComplete");
 					_dispatcher.removeEventListener( InjectorEvent.INJECT_DERIVATIVES, onCreationComplete_Derivative );
 				}
 			}						
@@ -353,20 +358,21 @@ package com.mindspace.l10n.maps
 		// ************************************************************************************************
 		
 		protected function onLoadLocale(event:LocaleEvent):void {
-			// Make sure the logger is configured...
+			// Make sure the _logger is configured...
 			configureLogging(_debugEnabled);
-			logger.debug("onLoadLocale() request for {0}",event.action);
+			_logger.debug("onLoadLocale() request for {0}",event.action);
 			
 			if (event.action == LocaleEvent.LOAD_LOCALE) {
 				
 				// Notify any listeners that a locale switch will happen next!
 				dispatchEvent(new LocaleMapEvent(LocaleMapEvent.LOCALE_CHANGING));
-				logger.debug("onLoadLocale() announce 'changing' locale");
+				_logger.debug("onLoadLocale() announce 'changing' locale");
 				
 				// Delegate the event processing to the ILocaleCommand instance
-				var cmd : ILocaleCommand = _commandFactory.newInstance() as ILocaleCommand;
-				if (cmd != null) cmd.execute(event);
-				else  			 logger.error(ERROR_INVALID_COMMAND_INSTANCE);
+				if (_localeCommand == null) _localeCommand = _commandFactory.newInstance() as ILocaleCommand; 
+				
+				if (_localeCommand != null) _localeCommand.execute(event);
+				else  			 			_logger.error(ERROR_INVALID_COMMAND_INSTANCE);
 			}
 		}
 		
@@ -380,7 +386,7 @@ package com.mindspace.l10n.maps
 			
 			if (logIt == true) {
 				var id 			: String = (uid != null) ? uid : getQualifiedClassName(injectorTarget); 
-				logger.debug("onCreationComplete_Target() for '{0}'",id);	
+				_logger.debug("onCreationComplete_Target() for '{0}'",id);	
 			}
 			dispatchEvent(new LocaleMapEvent(LocaleMapEvent.TARGET_READY, injectorTarget));
 		}
@@ -398,7 +404,7 @@ package com.mindspace.l10n.maps
 					var isDerivative : Boolean = InjectorUtils.isDerivative( injectorTarget, currentTarget  );
 					
 					if( isDerivative == true )   {
-						logger.debug("onCreationComplete_Derivative() for '{0}'", uid);
+						_logger.debug("onCreationComplete_Derivative() for '{0}'", uid);
 						onCreationComplete_Target( event, false );				
 					}
 				}
@@ -415,26 +421,20 @@ package com.mindspace.l10n.maps
 		// ************************************************************************************************
 		 
 		private function configureLogging(val:Boolean):void {
-			if (_commandFactory is StaticClassFactory) {
+			if (_commandFactory && _commandFactory is StaticClassFactory) {
 				
-				if (val && StaticClassFactory(_commandFactory).properties==null) {
-					// Attach customized logger
-					if (_logTarget == null) this.logTarget = new StaticClassFactory(TraceTarget,{level:LogEventLevel.DEBUG}); 
-					
+				if (StaticClassFactory(_commandFactory).properties == null) {
 					var clazz : Class = StaticClassFactory(_commandFactory).source;
-					StaticClassFactory(_commandFactory).properties = {log:LocaleLogger.getLogger(clazz, _isCustomFactory)}	
-				} else if (val == false) {
-					StaticClassFactory(_commandFactory).properties = null;
+					StaticClassFactory(_commandFactory).properties = {log:LocaleLogger.getLogger(clazz, _isCustomFactory)}
 				}
+				
+				enableLog = val;
 			}
 		}
 		
-				
-		private function get logger():ILogger {
-			return LocaleLogger.getLogger(this, false);
-		}
+		private var _logger						:ILogger        = LocaleLogger.getLogger(this, false);
 		private var _logTarget                  :ILoggingTarget = null;
-		private var _debugEnabled				:Boolean = false;
+		private var _debugEnabled				:Boolean 		= false;
 		
 		// ************************************************************************************************
 		//  Private Attributes
@@ -451,6 +451,8 @@ package com.mindspace.l10n.maps
 		private var _dispatcher 				:GlobalDispatcher 	= new GlobalDispatcher();
 		private var _listenerProxies			:Dictionary 		= new Dictionary(true);
 
+		private var _localeCommand              :ILocaleCommand = null;
+		
 		private var _commandFactory 			:IFactory 			= new StaticClassFactory(LocaleCommand);
 		private var _isCustomFactory            :Boolean            = false;
 		

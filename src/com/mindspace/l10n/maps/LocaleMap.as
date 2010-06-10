@@ -281,9 +281,13 @@ package com.mindspace.l10n.maps
 		protected function listenForCreationComplete(active:Boolean = true):void {
 			
 			
-			if (active == true) addListenerProxy   ( _dispatcher, FlexEvent.CREATION_COMPLETE );
+			if (active == true) {
+				addListenerProxy( _dispatcher, FlexEvent.CREATION_COMPLETE );
+				//addListenerProxy( _dispatcher, FlexEvent.CONTENT_CREATION_COMPLETE ); 
+			}
 			else 				{
 				removeListenerProxy( _dispatcher, FlexEvent.CREATION_COMPLETE );
+				removeListenerProxy( _dispatcher, FlexEvent.CONTENT_CREATION_COMPLETE ); 
 				logger.error("listenForCreationComplete() disabled because no targets are available. Locale changes and injectors will not work properly");
 			}
 			
@@ -311,7 +315,7 @@ package com.mindspace.l10n.maps
 			listenerProxy.addListener((type == null) ? "creationComplete" : type, 
 									  (type == null) ? this 			  : null );
 
-			logger.debug("addListenerProxy() Attaching global listener for all GUI 'creationComplete' events");
+			logger.debug("addListenerProxy() Attaching global listener for all GUI '{0}' events", type);
 			
 
 			return listenerProxy;

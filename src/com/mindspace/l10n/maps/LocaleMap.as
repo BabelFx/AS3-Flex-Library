@@ -29,12 +29,14 @@ package com.mindspace.l10n.maps
 	import com.mindspace.l10n.utils.debug.LocaleLogger;
 	import com.mindspace.l10n.utils.factory.StaticClassFactory;
 	
+	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.events.IEventDispatcher;
 	import flash.utils.Dictionary;
 	import flash.utils.getQualifiedClassName;
 	
 	import mx.core.IFactory;
+	import mx.core.IUIComponent;
 	import mx.events.FlexEvent;
 	import mx.logging.ILogger;
 	import mx.logging.ILoggingTarget;
@@ -150,6 +152,23 @@ package com.mindspace.l10n.maps
 	        	invalidateProperties();
 	        }
 		}
+		
+		/**
+		 * Since all children injectors (ResourceInjector and SmartResourcInjector) listen
+		 * for TARGET_READY events from the LocaleMap instance, this is a wrapper
+		 * facade to simplify that relationship. 
+		 * 
+		 * NOTE: This method is called from within the LocaleMap class AND provides 
+		 * easy registration of non-GUI instances from outside this class.
+		 *  
+		 * @param src UIComponent, Sprite or non-DisplayObject instance
+		 * 
+		 */
+		public function announceTargetReady(src:Object):void {
+			if (src != null) {
+				this.dispatchEvent(new LocaleMapEvent(LocaleMapEvent.TARGET_READY, src));
+			}
+		}
 
 		public function addTarget(another:Class):void {
 			if (another && !alreadyRegistered(another)) {
@@ -216,6 +235,7 @@ package com.mindspace.l10n.maps
 			if(_dispatcher != null) {
 				registerAll();
 				listenForCreationComplete(haveTargets);
+				listenForSprites(haveTargets);
 			}
 		}
 
@@ -238,6 +258,11 @@ package com.mindspace.l10n.maps
 			commitProperties();
 			
 			dispatchEvent(new LocaleMapEvent(LocaleMapEvent.INITIALIZED, document));
+			
+			// Add listener to register non-UIComponents for injection...
+			this.addEventListener(LocaleMapEvent.REGISTER_TARGET, onSpriteAddedToStage);
+			_logger.debug("addEventListener for externally dispatched '{0}' ", LocaleMapEvent.REGISTER_TARGET);
+			
 		}
 		
 		// ************************************************************************************************
@@ -247,7 +272,7 @@ package com.mindspace.l10n.maps
 		protected  function registerAll():void {
 			if(!targetsRegistered && _targets) {
 				for each (var it:* in _targets) {
-					register(it);
+					registerTargetClass(it);
 				}
 				targetsRegistered = true;
 			}
@@ -272,12 +297,12 @@ package com.mindspace.l10n.maps
 			}
 		}
 		
-		protected function register(target:*):void {
+		protected function registerTargetClass(target:*):void {
 			var currentType:String = ( target is Class) ? getQualifiedClassName( target ) : (target as String);
 			
 			if (currentType && currentType != "") {
 				_dispatcher.addEventListener( currentType, onCreationComplete_Target, false, 0, true);
-				_logger.debug("register({0})",currentType);
+				_logger.debug("registerTargetClass({0})",currentType);
 			}
 		}
 		
@@ -286,24 +311,36 @@ package com.mindspace.l10n.maps
 		//  CreationComplete Listeners Methods
 		// ************************************************************************************************
 		
+		/**
+		 * Add support to auto-listen for Sprites and MovieClips "addedToStage" events. This is required
+		 * because only IUIComponent dispatches "creationComplete" events.
+		 *  
+		 * @param active Boolean to add or remove global listener
+		 * 
+		 */
+		protected function listenForSprites(active:Boolean = true):void {
+			if (active == true) _dispatcher.addEventListener(Event.ADDED_TO_STAGE,onSpriteAddedToStage);
+			else			    _dispatcher.removeEventListener(Event.ADDED_TO_STAGE,onSpriteAddedToStage);
+			
+			_logger.debug("listenForSprites(active=={0}) Activating global listener for all sprite '{1}' events", active, Event.ADDED_TO_STAGE);
+		}
+		
 		protected function listenForCreationComplete(active:Boolean = true):void {
-			
-			
 			if (active == true) {
+				
 				addListenerProxy( _dispatcher, FlexEvent.CREATION_COMPLETE );
-			}
-			else 				{
-				removeListenerProxy( _dispatcher, FlexEvent.CREATION_COMPLETE );
-			}
-			
-			if (active == true) {
+
 				_dispatcher.addEventListener(LocaleEvent.EVENT_ID,onLoadLocale,false,0,true);
 				this.addEventListener(LocaleEvent.EVENT_ID,onLoadLocale);
-			}
-			else {
+				
+			} else {
+				
+				removeListenerProxy( _dispatcher, FlexEvent.CREATION_COMPLETE );
+
 				_dispatcher.removeEventListener(LocaleEvent.EVENT_ID,onLoadLocale);
 				this.removeEventListener(LocaleEvent.EVENT_ID,onLoadLocale);
 			}
+			
 
 			listenForDerivatives(active);
 		}
@@ -357,6 +394,22 @@ package com.mindspace.l10n.maps
 		//  CreationComplete EventHandlers
 		// ************************************************************************************************
 		
+		/**
+		 * For any non-UIComponent instance (such as Sprites or MovieClips), announce to all injectors that the target
+		 * is ready for injections. This method is ALSO used to support registration (and target-ready announcements)
+		 * for non-GUI instances (such as models and controllers).
+		 * 
+		 * Note: LocaleMapEvent.REGISTER_TARGET events are used to register non-GUI instances 
+		 *       
+		 * @param event
+		 */		
+		protected function onSpriteAddedToStage(event:Event):void {
+			var target:Object = (event is LocaleMapEvent) ? LocaleMapEvent(event).targetInst : event.target;
+			_logger.debug("onSpriteAddedToStage() for '{0}'", getQualifiedClassName(target));
+			
+			if (target && !(target is IUIComponent)) announceTargetReady(target);
+		}
+		
 		protected function onLoadLocale(event:LocaleEvent):void {
 			// Make sure the _logger is configured...
 			configureLogging(_debugEnabled);
@@ -388,7 +441,7 @@ package com.mindspace.l10n.maps
 				var id 			: String = (uid != null) ? uid : getQualifiedClassName(injectorTarget); 
 				_logger.debug("onCreationComplete_Target() for '{0}'",id);	
 			}
-			dispatchEvent(new LocaleMapEvent(LocaleMapEvent.TARGET_READY, injectorTarget));
+			announceTargetReady(injectorTarget);
 		}
 
 		/**

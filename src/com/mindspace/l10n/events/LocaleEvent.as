@@ -2,9 +2,15 @@ package com.mindspace.l10n.events
 {
 	import flash.events.Event;
 	
+	/**
+	 * This events define actions for Locales and ResourceBundles
+	 * 
+	 * @author thomasburleson
+	 * 
+	 */
 	public class LocaleEvent extends Event
 	{	
-		public static const INITIALIZE   :String = "initStartupLocalization";
+		public static const INITIALIZE   :String = "initializeLocaleDefaults";
 		public static const LOAD_LOCALE  :String = "loadLocaleResources";
 		
 		public static const EVENT_ID     :String = "loadLocale";

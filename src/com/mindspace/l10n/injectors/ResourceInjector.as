@@ -446,7 +446,7 @@ package com.mindspace.l10n.injectors
 						else 			 log.debug("inject '{0}' into '{1}' from resource {2}::{3}",val,map.property,map.bundleName,map.key);
 						
 						if (ui.hasOwnProperty(property) == true) 	ui[property] = val;
-						else 										(ui as UIComponent).setStyle(property,val);
+						else if (ui is UIComponent)					(ui as UIComponent).setStyle(property,val);
 					}
 			
 				

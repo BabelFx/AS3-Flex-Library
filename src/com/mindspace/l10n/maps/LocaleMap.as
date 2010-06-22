@@ -62,7 +62,7 @@ package com.mindspace.l10n.maps
 			
 			if (val == true) {
 				// Attach existing or new customized _logger
-				this.logTarget = _logTarget ? _logTarget : new StaticClassFactory(TraceTarget,_defaultProperties);		
+				this.loggingTarget = _logTarget ? _logTarget : new StaticClassFactory(TraceTarget,_defaultProperties);		
 				
 			} else if (!val && (_logTarget !=null)) {
 				// Disable any logging for now...
@@ -77,7 +77,7 @@ package com.mindspace.l10n.maps
 		 * @param val ILoggingTarget or IFactory
 		 * 
 		 */
-		public function set logTarget(val : *):void {
+		public function set loggingTarget(val : *):void {
 			if (val == null) return;	// Clear existing target not supported
 			
 			if ((_logTarget != null) && val) LocaleLogger.removeLoggingTarget(_logTarget);

@@ -63,7 +63,7 @@ package com.mindspace.l10n.injectors
 	  
 	public class ResourceInjector extends EventDispatcher implements IMXMLObject {
 		
-		 public var log		   : ILogger= LocaleLogger.getLogger(this, false);
+		 public var log		   : ILogger= LocaleLogger.getLogger(this);
 		 
 		 public var id         : String = "";
 		 public var bundleName : String = ""; 

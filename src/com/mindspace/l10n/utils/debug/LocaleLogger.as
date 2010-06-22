@@ -8,14 +8,21 @@ package com.mindspace.l10n.utils.debug
 	import mx.logging.ILoggingTarget;
 	import mx.logging.LogEvent;
 	import mx.logging.LogEventLevel;
-	import mx.logging.targets.TraceTarget;
 	
 	public class LocaleLogger extends EventDispatcher implements ILogger
 	{
-		protected static var loggers		:Dictionary = new Dictionary();
-		protected static var loggingTargets	:Array		= [];
-		
-		public static function getLogger( target:Object , fullPath:Boolean = true):ILogger
+		public static var defaultFilters : Array = [ 	"com.mindspace.l10n.maps.*",
+														"com.mindspace.l10n.commands.*",
+														"com.mindspace.l10n.injectors.*"
+												];
+		/**
+		 * 
+		 * @param target
+		 * @param fullPath
+		 * @return 
+		 * 
+		 */
+		public static function getLogger( target:Object, fullPath:Boolean = true):ILogger
 		{
 			loggers ||= new Dictionary();
 			
@@ -26,10 +33,7 @@ package com.mindspace.l10n.utils.debug
 			// if the logger doesn't already exist, create and store it
 			if( logger == null )
 			{
-				var category : String = fullPath 					 ?  className 									: 
-									    className.indexOf("::") >= 0 ?	className.substr(className.indexOf("::")+2)	:
-										className;
-				logger = new LocaleLogger( category, new ConstructorLock);
+				logger = new LocaleLogger( getCategoryFor(target,fullPath), new ConstructorLock);
 				loggers[ className ] = logger;
 			}
 			
@@ -43,6 +47,36 @@ package com.mindspace.l10n.utils.debug
 			return logger;
 		}
 		
+		/**
+		 * 
+		 * @param target
+		 * @param fullPath
+		 * @return 
+		 * 
+		 */
+		public static function getCategoryFor(target:Object, fullPath:Boolean=true):String {
+			// Target is a class or instance; we want the fully-qualified Classname
+			var className:String  = getQualifiedClassName( target );
+			var category : String = fullPath 					 ?  className 									: 
+									className.indexOf("::") >= 0 ?	className.substr(className.indexOf("::")+2)	:
+									className;
+			
+			return category;
+		}
+		
+		public static function addToFilters(target:Object):void {
+			var clazzName   : String  = (target is String) ? (target as String) : getQualifiedClassName(target);
+			var path    	: String  = clazzName.indexOf(":") >= 0 ? clazzName.substr(0,clazzName.indexOf(":")) + ".*" : "";
+
+			defaultFilters = smartAddFilter(path,defaultFilters);
+		}
+		
+		
+		/**
+		 * 
+		 * @param it
+		 * 
+		 */
 		public static function addLoggingTarget( it:ILoggingTarget ):void {
 			loggingTargets ||= [];
 			
@@ -63,6 +97,11 @@ package com.mindspace.l10n.utils.debug
 		}
 		
 		
+		/**
+		 * 
+		 * @param it
+		 * 
+		 */
 		public static function removeLoggingTarget(it:ILoggingTarget):void {
 			if (it == null) return;
 			
@@ -117,27 +156,11 @@ package com.mindspace.l10n.utils.debug
 		 * 
 		 */
 		private static function initializeTarget(val:ILoggingTarget):void {
-			var tracer : TraceTarget = val as TraceTarget	
-			if (tracer != null) {
-				// If it appears to be an unchanged tracer... customize it for l10nInjection
-				if (!tracer.includeCategory && 
-					!tracer.includeDate 	&& 
-					!tracer.includeTime 	&& 
-					!tracer.includeLevel) {
-
-					var l10nPackages : Array = [
-												 "com.asfusion.mate.l10n.maps.*",
-												 "com.asfusion.mate.l10n.commands.*",
-												 "com.asfusion.mate.l10n.injectors.*"
-											    ];
-					
-					tracer.filters			= tracer["filters"].concat(l10nPackages);
-					tracer.level			= (tracer.level == LogEventLevel.ALL) ? LogEventLevel.DEBUG : tracer.level;
-					tracer.includeDate		= false;
-					tracer.includeTime		= true;
-					tracer.includeCategory  = true;
-					tracer.includeLevel     = true;
-				}
+			if (val != null) {
+				var concat : Boolean = !((val.filters.length == 1) && (val.filters[0] == "*")); 
+				
+				val.filters = concat ? val.filters.concat(defaultFilters) : defaultFilters;
+				val.level   = (val.level == LogEventLevel.ALL) ? LogEventLevel.DEBUG : val.level;
 			}
 		}
 		
@@ -243,6 +266,31 @@ package com.mindspace.l10n.utils.debug
 			{
 				dispatchEvent( new LogEvent( constructMessage( msg, rest ), LogEventLevel.FATAL ) );
 			}
+		}
+
+		protected static var loggers		:Dictionary = new Dictionary();
+		protected static var loggingTargets	:Array		= [];
+		
+		
+		private static function smartAddFilter(src:String,filters:Array):Array {
+			var results : Array   = [];
+			var len     : int 	  = src.indexOf( "*" ) - 1;
+			var found   : Boolean = false;
+			
+			for each (var it:String in filters) {
+				// Remove default wildcard "match all" filter 
+				if (it == "*") 			continue;
+				
+				if (src.substring(0, len) != it.substring(0, len)) {
+					// existing filter item to keep
+					results.push(it);	
+				}
+			}
+			
+			// Add newest filter category filter was not in list... so add it!
+			results.push(src);
+			
+			return results;
 		}
 	}
 }

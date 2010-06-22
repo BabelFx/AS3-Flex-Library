@@ -13,7 +13,7 @@ package com.mindspace.l10n.commands
 	
 	public class LocaleCommand implements ILocaleCommand {	
 		
-		public var log : ILogger = LocaleLogger.getLogger(this, false);
+		public var log : ILogger = LocaleLogger.getLogger(this);
 		
 		public function execute( event:LocaleEvent ):void {
 			

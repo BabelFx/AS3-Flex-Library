@@ -62,7 +62,7 @@ package com.mindspace.l10n.maps
 			
 			if (val == true) {
 				// Attach existing or new customized _logger
-				this.logTarget = _logTarget ? _logTarget : new StaticClassFactory(TraceTarget,{level:LogEventLevel.DEBUG});		
+				this.logTarget = _logTarget ? _logTarget : new StaticClassFactory(TraceTarget,_defaultProperties);		
 				
 			} else if (!val && (_logTarget !=null)) {
 				// Disable any logging for now...
@@ -80,11 +80,17 @@ package com.mindspace.l10n.maps
 		public function set logTarget(val : *):void {
 			if (val == null) return;	// Clear existing target not supported
 			
+			if ((_logTarget != null) && val) LocaleLogger.removeLoggingTarget(_logTarget);
+			
+			
 			_logTarget = (val is ILoggingTarget) ? 	ILoggingTarget(val) 						  :
-						 (val is IFactory)		 ?	IFactory(val).newInstance() as ILoggingTarget : null;
+						 (val is IFactory)		 ?	IFactory(val).newInstance() as ILoggingTarget : 
+						 (val is Class)          ?  new StaticClassFactory(val,_defaultProperties).newInstance() : 
+						 (val is String)         ?  new StaticClassFactory(val,_defaultProperties).newInstance() : null;
 			
 			if (_logTarget != null) {
 				_debugEnabled = true;
+				LocaleLogger.addToFilters(this);
 				LocaleLogger.addLoggingTarget(_logTarget);
 			}
 		}
@@ -485,7 +491,7 @@ package com.mindspace.l10n.maps
 			}
 		}
 		
-		private var _logger						:ILogger        = LocaleLogger.getLogger(this, false);
+		private var _logger						:ILogger        = LocaleLogger.getLogger(this);
 		private var _logTarget                  :ILoggingTarget = null;
 		private var _debugEnabled				:Boolean 		= false;
 		
@@ -493,6 +499,7 @@ package com.mindspace.l10n.maps
 		//  Private Attributes
 		// ************************************************************************************************
 
+		
 		protected var targetsRegistered			:Boolean = false;
 		protected var includeDerivativesChanged	:Boolean = false;
 
@@ -506,6 +513,7 @@ package com.mindspace.l10n.maps
 
 		private var _localeCommand              :ILocaleCommand = null;
 		
+		private var _defaultProperties          :Object             = { level:LogEventLevel.DEBUG, includeCategory:true, includeTime:true, includeLevel:true };
 		private var _commandFactory 			:IFactory 			= new StaticClassFactory(LocaleCommand);
 		private var _isCustomFactory            :Boolean            = false;
 		

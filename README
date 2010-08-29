@@ -1,4 +1,4 @@
-Multi-language (l10n) Injection for Flex 
+BabelFx Framework: Multi-language (l10n) Injection for Flex and Flash applications (aka l10nInjection). 
 
 Combining IoC concepts with the power of MXML, this library provides a powerful, easy framework for run-time 
 injection of localized resources (strings, bitmaps, skins, etc.) into Flex GUI views and non-DisplayObject models 

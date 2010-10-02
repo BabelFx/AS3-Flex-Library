@@ -1,4 +1,6 @@
-BabelFx Framework: Multi-language (l10n) Injection for Flex and Flash applications (aka l10nInjection). 
+## BabelFx 
+
+Formerly known as *l10nInjection*, the **BabelFx** Framework provides multi-language (l10n) Injection for Flex and Flash applications. 
 
 ### Introduction
 
@@ -20,11 +22,12 @@ The BabelFx solution can be used:
 - Within AIR deployments or Web-only solutions. 
 - Within modules or applications.
 
-Please review the WIKI docs and blogs at http://www.gridlinked.info for details and tutorials. This GIT repository 
-contains the both: 
+This GIT repository contains the both: 
 
-1. the source code for the l10nInjection.swc flex library, and 
+1. the source code for the BabelFX.swc flex library, and 
 2. the FlashBuilder 4 Flex library project settings  
+
+Please review the [tutorials and blogs](http://www.gridlinked.info) and [code samples](http://github.com/ThomasBurleson/l10nInjection_Samples/wiki). 
 
 
 ### Library Build Tips

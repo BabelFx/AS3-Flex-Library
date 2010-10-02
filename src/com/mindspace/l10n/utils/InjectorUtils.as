@@ -23,6 +23,8 @@ package com.mindspace.l10n.utils
 	import flash.utils.getDefinitionByName;
 	import flash.utils.getQualifiedClassName;
 	
+	import mx.utils.UIDUtil;
+	
 	public class InjectorUtils
 	{
 		
@@ -143,6 +145,5 @@ package com.mindspace.l10n.utils
 			return results;
 		}
 
-	
 	}
 }

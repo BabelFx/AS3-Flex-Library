@@ -47,10 +47,10 @@ package com.mindspace.l10n.commands
 		 * Load locale specified. If already loaded, then simply trigger ResourceManger "change" event so
 		 * databindings fire to update with locale settings. If not loaded, then load from "locale/Resource_{locale}.swf" file 
 		 *  
-		 * @param locale String specifing request locale; e.g. en_US, en_NZ, es_MX, etc.
+		 * @param locale String specifies request locale; e.g. en_US, en_NZ, es_MX, etc.
 		 * 
 		 *  ******************************************************************************************
-		 *  !!Important: before the locale resourcebundles are assigned (after loading) we must FIRST load (1) & (2):
+		 *  !!Important: before the locale resourcebundles are assigned (after loading) we must FIRST load (1) and (2):
 		 *  ******************************************************************************************
 		 * 
 		 *   1) StyleSheets for locale

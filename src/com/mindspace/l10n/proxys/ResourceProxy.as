@@ -47,7 +47,7 @@ package com.mindspace.l10n.proxys
 	public class ResourceProxy extends ResourceMap implements IEventDispatcher, ITargetInjectable {
 		
 		/**
-		 * Unique identifier for instance of target class. Only this instances with the <inst>.id === targetID 
+		 * Unique identifier for instance of target class. Only this instances with the inst.id === targetID 
 		 * will bre processed/be updated regarding locale changes 
 		 */
 		public var targetID : String = "";

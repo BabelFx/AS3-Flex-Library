@@ -27,6 +27,6 @@
   </includeClasses>
   <includeResources/>
   <namespaceManifests>
-    <namespaceManifestEntry manifest="manifest.xml" namespace="library://ns.mindspace.com/l10n/flex/"/>
+    <namespaceManifestEntry manifest="manifest.xml" namespace="library://ns.babelfx.org/l10n/flex/"/>
   </namespaceManifests>
 </flexLibProperties>

@@ -25,6 +25,7 @@ package com.mindspace.l10n.maps
 	import com.mindspace.l10n.commands.ILocaleCommand;
 	import com.mindspace.l10n.commands.LocaleCommand;
 	import com.mindspace.l10n.events.*;
+	import com.mindspace.l10n.injectors.ResourceInjector;
 	import com.mindspace.l10n.utils.InjectorUtils;
 	import com.mindspace.l10n.utils.debug.LocaleLogger;
 	import com.mindspace.l10n.utils.factory.StaticClassFactory;
@@ -46,6 +47,8 @@ package com.mindspace.l10n.maps
 	[Event(name='localeChanging',type='com.mindspace.l10n.events.LocaleMapEvent')]
 	[Event(name='targetReady',	 type='com.mindspace.l10n.events.LocaleMapEvent')]
 	[Event(name='initialized',   type='com.mindspace.l10n.events.LocaleMapEvent')]
+	
+	[DefaultProperty("injectors")]
 	
 	public class LocaleMap extends AbstractMap  {
 		
@@ -219,7 +222,36 @@ package com.mindspace.l10n.maps
 	        }
 		}
 
+		
+		// ************************************************************************************************
+		//  Support for Programmatic instantiations
+		// ************************************************************************************************
+		
+		public var injectors : Array = [ ];
 
+		public function addInjectors(injectors:Array):void {
+			if (this.injectors != injectors) {
+				for each (var oit:ResourceInjector in injectors) {
+					if (oit == null) continue;
+					oit.release();
+				}
+				
+				this.injectors = injectors;
+				
+				for each (var nit:ResourceInjector in injectors) {
+					nit.initialized(this,"");
+				}
+				invalidateProperties();
+			}
+		}
+		
+		public function inject(locale:String=null):void {
+			validateNow();
+			if (locale  != null) {
+				dispatchEvent(new LocaleEvent(LocaleEvent.LOAD_LOCALE,locale));
+			}
+		}
+		
 		// ************************************************************************************************
 		//  Validation Methods
 		// ************************************************************************************************
@@ -236,7 +268,7 @@ package com.mindspace.l10n.maps
 		 * Processes the properties set on the component.
 		*/
 		protected function commitProperties():void {
-			var haveTargets : Boolean = (_targets.length > 0);
+			var haveTargets : Boolean = (_targets.length > 0); 
 
 			if(_dispatcher != null) {
 				registerAll();

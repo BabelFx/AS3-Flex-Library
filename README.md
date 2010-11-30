@@ -32,7 +32,7 @@ Please review the [tutorials and blogs](http://www.gridlinked.info) and [code sa
 
 ### Library Build Tips
 
-    Namespace URL:   library://ns.mindspace.com/l10n/flex/
+    Namespace URL:   library://ns.babelfx.org/l10n/flex/
     Manifest file:  manifest.xml
 
 ### Open-Source License

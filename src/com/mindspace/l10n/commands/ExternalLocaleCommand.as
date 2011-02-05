@@ -61,8 +61,7 @@ package com.mindspace.l10n.commands
 		 */
 		override protected function loadLocale(locale:String):void {
 			var allKnown      : Array   = _localeMngr.getLocales();
-			var alreadyLoaded : Boolean = (locale == defaultLocale) ? true : 
-										  (allKnown.indexOf(locale) > -1) || (allKnown.indexOf(locale.toLowerCase()) > -1);
+			var alreadyLoaded : Boolean = (allKnown.indexOf(locale) > -1) || (allKnown.indexOf(locale.toLowerCase()) > -1);
 			
 			// Cache for result handler
 			_localeToLoad = locale;
@@ -71,9 +70,9 @@ package com.mindspace.l10n.commands
 				log.debug("loadLocale({0}) - external",locale);
 				
 				var dispatcher : IEventDispatcher = _localeMngr.loadResourceModule(this.urlExternalLocale,false);
-				    dispatcher.addEventListener(ResourceEvent.COMPLETE,onResult_localeLoaded);
-				    dispatcher.addEventListener(ResourceEvent.ERROR,onError_localeLoaded);
-				    
+					dispatcher.addEventListener(ResourceEvent.COMPLETE,onResult_localeLoaded);
+					dispatcher.addEventListener(ResourceEvent.ERROR,onError_localeLoaded);
+				
 			} else {
 				// Just set it as the first in the list... which fires "change" events also
 				onResult_localeLoaded();
@@ -83,10 +82,10 @@ package com.mindspace.l10n.commands
 		// ************************************************************************
 		// Private DataService Handlers
 		// ************************************************************************
-
+		
 		private function onResult_localeLoaded(event:ResourceEvent=null):void {
 			
-			 if (((_localeToLoad != "") && !event) || (event.type == ResourceEvent.COMPLETE)) {
+			if (((_localeToLoad != "") && !event) || (event.type == ResourceEvent.COMPLETE)) {
 				// Note: ResourceManager searches bundles for locales from first (0-index) to last
 				//       the last locale is the "fallback" bundle. As such, en_US should always be the last.
 				var fallback     : Array = [defaultLocale];

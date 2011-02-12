@@ -6,24 +6,29 @@
     <classEntry path="com.asfusion.mate.core.ListenerProxy"/>
     <classEntry path="com.asfusion.mate.events.InjectorEvent"/>
     <classEntry path="com.asfusion.mate.events.InjectorSettingsEvent"/>
+    <classEntry path="com.asfusion.mate.utils.SystemManagerFinder"/>
+    <classEntry path="com.asfusion.mate.utils.binding.SoftChangeWatcher"/>
+    <classEntry path="com.asfusion.mate.utils.debug.LogInfo"/>
+    <classEntry path="com.asfusion.mate.utils.debug.LogTypes"/>
+    <classEntry path="com.codecatalyst.factory.ClassFactory"/>
+    <classEntry path="com.codecatalyst.factory.ClassUtil"/>
+    <classEntry path="com.codecatalyst.factory.ItemRendererFactory"/>
+    <classEntry path="com.codecatalyst.factory.UIClassFactory"/>
     <classEntry path="com.mindspace.l10n.commands.ExternalLocaleCommand"/>
     <classEntry path="com.mindspace.l10n.commands.ILocaleCommand"/>
     <classEntry path="com.mindspace.l10n.commands.LocaleCommand"/>
     <classEntry path="com.mindspace.l10n.events.LocaleEvent"/>
     <classEntry path="com.mindspace.l10n.events.LocaleMapEvent"/>
-    <classEntry path="com.mindspace.l10n.proxys.ITargetInjectable"/>
-    <classEntry path="com.mindspace.l10n.proxys.PropertyProxy"/>
     <classEntry path="com.mindspace.l10n.injectors.ResourceInjector"/>
-    <classEntry path="com.mindspace.l10n.proxys.ResourceMap"/>
-    <classEntry path="com.mindspace.l10n.proxys.ResourceProxy"/>
     <classEntry path="com.mindspace.l10n.injectors.SmartResourceInjector"/>
     <classEntry path="com.mindspace.l10n.maps.AbstractMap"/>
     <classEntry path="com.mindspace.l10n.maps.LocaleMap"/>
+    <classEntry path="com.mindspace.l10n.proxys.ITargetInjectable"/>
+    <classEntry path="com.mindspace.l10n.proxys.PropertyProxy"/>
+    <classEntry path="com.mindspace.l10n.proxys.ResourceMap"/>
+    <classEntry path="com.mindspace.l10n.proxys.ResourceProxy"/>
     <classEntry path="com.mindspace.l10n.utils.InjectorUtils"/>
-    <classEntry path="com.asfusion.mate.utils.SystemManagerFinder"/>
-    <classEntry path="com.asfusion.mate.utils.binding.SoftChangeWatcher"/>
-    <classEntry path="com.asfusion.mate.utils.debug.LogInfo"/>
-    <classEntry path="com.asfusion.mate.utils.debug.LogTypes"/>
+    <classEntry path="com.mindspace.l10n.utils.debug.LocaleLogger"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests>

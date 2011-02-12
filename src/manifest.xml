@@ -9,5 +9,8 @@
 	<component class="com.mindspace.l10n.maps.LocaleMap"/>
 	<component class="com.mindspace.l10n.commands.ExternalLocaleCommand" />
 	
-	<component class="com.mindspace.l10n.utils.factory.StaticClassFactory" />
+	<component class="com.codecatalyst.factory.ClassFactory" />
+	<component class="com.codecatalyst.factory.UIClassFactory" />
+	<component class="com.codecatalyst.factory.ItemRendererFactory" />
+	
 </componentPackage>

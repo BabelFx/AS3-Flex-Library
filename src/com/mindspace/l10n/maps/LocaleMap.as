@@ -22,13 +22,13 @@ package com.mindspace.l10n.maps
 	import com.asfusion.mate.core.GlobalDispatcher;
 	import com.asfusion.mate.core.ListenerProxy;
 	import com.asfusion.mate.events.InjectorEvent;
+	import com.codecatalyst.factory.ClassFactory;
 	import com.mindspace.l10n.commands.ILocaleCommand;
 	import com.mindspace.l10n.commands.LocaleCommand;
 	import com.mindspace.l10n.events.*;
 	import com.mindspace.l10n.injectors.ResourceInjector;
 	import com.mindspace.l10n.utils.InjectorUtils;
 	import com.mindspace.l10n.utils.debug.LocaleLogger;
-	import com.mindspace.l10n.utils.factory.StaticClassFactory;
 	
 	import flash.display.DisplayObject;
 	import flash.events.Event;
@@ -65,7 +65,7 @@ package com.mindspace.l10n.maps
 			
 			if (val == true) {
 				// Attach existing or new customized _logger
-				this.loggingTarget = _logTarget ? _logTarget : new StaticClassFactory(TraceTarget,_defaultProperties);		
+				this.loggingTarget = _logTarget ? _logTarget : new ClassFactory(TraceTarget,null,_defaultProperties);		
 				
 			} else if (!val && (_logTarget !=null)) {
 				// Disable any logging for now...
@@ -88,8 +88,8 @@ package com.mindspace.l10n.maps
 			
 			_logTarget = (val is ILoggingTarget) ? 	ILoggingTarget(val) 						  :
 						 (val is IFactory)		 ?	IFactory(val).newInstance() as ILoggingTarget : 
-						 (val is Class)          ?  new StaticClassFactory(val,_defaultProperties).newInstance() : 
-						 (val is String)         ?  new StaticClassFactory(val,_defaultProperties).newInstance() : null;
+						 (val is Class)          ?  new ClassFactory(val,null,_defaultProperties).newInstance() : 
+						 (val is String)         ?  new ClassFactory(val,null,_defaultProperties).newInstance() : null;
 			
 			if (_logTarget != null) {
 				_debugEnabled = true;
@@ -109,7 +109,7 @@ package com.mindspace.l10n.maps
 		 * 				<mx:ClassFactory generator="{MyLocaleLoader}" properties="{loaderConfig}" />
 		 *      </l10n:commandFactory>
 		 * 		<l10n:loggingTarget>
-		 * 				<l10n:StaticClassFactory generator="{mx.logging.targets.TraceTarget}" properties="{{level:LogEventType.WARN + LogEventType.ERROR}}"
+		 * 				<l10n:ClassFactory generator="{mx.logging.targets.TraceTarget}" properties="{{level:LogEventType.WARN + LogEventType.ERROR}}"
 		 * 		</l10n:logginTargets>
 		 * 	  </l0n:LocaleMap>
 		 *  
@@ -120,11 +120,11 @@ package com.mindspace.l10n.maps
 			if (val == null) return;
 			
 			if (val is IFactory)     _commandFactory = val as IFactory;
-			else if (val is Class)	 _commandFactory = new StaticClassFactory(val as Class);
+			else if (val is Class)	 _commandFactory = new ClassFactory(val as Class);
 			else {
 				// Use internal default locale switcher command 
 				// LocaleCommand does not load external bundles, instead it simply switches embedded locales
-				_commandFactory = new StaticClassFactory(LocaleCommand);
+				_commandFactory = new ClassFactory(LocaleCommand);
 				_logger.error(ERROR_INVALID_FACTORY);
 			}
 			
@@ -512,11 +512,11 @@ package com.mindspace.l10n.maps
 		// ************************************************************************************************
 		 
 		private function configureLogging(val:Boolean):void {
-			if (_commandFactory && _commandFactory is StaticClassFactory) {
+			if (_commandFactory && _commandFactory is ClassFactory) {
 				
-				if (StaticClassFactory(_commandFactory).properties == null) {
-					var clazz : Class = StaticClassFactory(_commandFactory).source;
-					StaticClassFactory(_commandFactory).properties = {log:LocaleLogger.getLogger(clazz, _isCustomFactory)}
+				if (ClassFactory(_commandFactory).properties == null) {
+					var clazz : Class = ClassFactory(_commandFactory).generator;
+					ClassFactory(_commandFactory).properties = {log:LocaleLogger.getLogger(clazz, _isCustomFactory)}
 				}
 				
 				enableLog = val;
@@ -546,7 +546,7 @@ package com.mindspace.l10n.maps
 		private var _localeCommand              :ILocaleCommand = null;
 		
 		private var _defaultProperties          :Object             = { level:LogEventLevel.DEBUG, includeCategory:true, includeTime:true, includeLevel:true };
-		private var _commandFactory 			:IFactory 			= new StaticClassFactory(LocaleCommand);
+		private var _commandFactory 			:IFactory 			= new ClassFactory(LocaleCommand);
 		private var _isCustomFactory            :Boolean            = false;
 		
 		private namespace self;

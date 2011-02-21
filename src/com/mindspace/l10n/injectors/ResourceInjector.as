@@ -442,11 +442,13 @@ package com.mindspace.l10n.injectors
 			}
 			
 			function assignKeyValue(val:*):void {
-				if (val == null) logError(map, ERROR_KEY_VALUE_MISSING);
-				else 			 log.debug("inject '{0}' into '{1}' from resource {2}::{3}",val,map.property,map.bundleName,map.key);
-				
-				if (ui.hasOwnProperty(property) == true) 	ui[property] = val;
-				else if (ui is UIComponent)					(ui as UIComponent).setStyle(property,val);
+				if (val == null) {
+				  logError(map, ERROR_KEY_VALUE_MISSING);
+				} else {
+				  log.debug("inject '{0}' into '{1}' from resource {2}::{3}",val,map.property,map.bundleName,map.key);
+				  if (ui.hasOwnProperty(property) == true) 	ui[property] = val;
+				  else if (ui is UIComponent)					(ui as UIComponent).setStyle(property,val);
+				}
 			}
 			
 			

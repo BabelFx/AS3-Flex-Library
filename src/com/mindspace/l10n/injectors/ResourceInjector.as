@@ -272,7 +272,7 @@ package com.mindspace.l10n.injectors
 		 * Proxy method to provide programmatic access to ResourceManager::getString() functionality
 		 * 
 		 * @param key			Name/ID key for name/value pair in the specified resource bundle 
-		 * @param parameters   Optional paramters to be used for parameterized results
+		 * @param parameters   Optional parameters to be used for parameterized results
 		 * @param bundle		Optional bundlename that overrides the default specified in ResourceInjector constructor
 		 * 
 		 * @return				String lookup results for the specified locale/bundle 

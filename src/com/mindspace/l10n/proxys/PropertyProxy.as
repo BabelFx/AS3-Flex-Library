@@ -54,7 +54,7 @@ package com.mindspace.l10n.proxys 
 
 
 		/**
-		 * Which "view state" should be used to trigger the injector when paramters, target, or locale changes? 
+		 * Which "view state" should be used to trigger the injector when parameters, target, or locale changes? 
 		 */
 		public var state : String = "";
 		

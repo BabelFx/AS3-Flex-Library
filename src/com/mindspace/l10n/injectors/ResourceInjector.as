@@ -272,7 +272,7 @@ package com.mindspace.l10n.injectors
 		 * Proxy method to provide programmatic access to ResourceManager::getString() functionality
 		 * 
 		 * @param key			Name/ID key for name/value pair in the specified resource bundle 
-		 * @param parameters   Optional paramters to be used for parameterized results
+		 * @param parameters   Optional parameters to be used for parameterized results
 		 * @param bundle		Optional bundlename that overrides the default specified in ResourceInjector constructor
 		 * 
 		 * @return				String lookup results for the specified locale/bundle 
@@ -442,11 +442,13 @@ package com.mindspace.l10n.injectors
 			}
 			
 			function assignKeyValue(val:*):void {
-				if (val == null) logError(map, ERROR_KEY_VALUE_MISSING);
-				else 			 log.debug("inject '{0}' into '{1}' from resource {2}::{3}",val,map.property,map.bundleName,map.key);
-				
-				if (ui.hasOwnProperty(property) == true) 	ui[property] = val;
-				else if (ui is UIComponent)					(ui as UIComponent).setStyle(property,val);
+				if (val == null) {
+				  logError(map, ERROR_KEY_VALUE_MISSING);
+				} else {
+				  log.debug("inject '{0}' into '{1}' from resource {2}::{3}",val,map.property,map.bundleName,map.key);
+				  if (ui.hasOwnProperty(property) == true) 	ui[property] = val;
+				  else if (ui is UIComponent)					(ui as UIComponent).setStyle(property,val);
+				}
 			}
 			
 			

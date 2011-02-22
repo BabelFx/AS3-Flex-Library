@@ -28,7 +28,7 @@ package com.mindspace.l10n.proxys
 	[Event(name='propertyChange',type='mx.events.PropertyChangeEvent')]
 	
 	/**
-	 * Special ResourceMap that supports runtime databinding changes to the paramters property.
+	 * Special ResourceMap that supports runtime databinding changes to the parameters property.
 	 * Changes to parameters triggers notifications to ResourceInjector; which then manually forces an 
 	 * update to the target [ui instance] with the localized parameterized string.
 	 * Parameterized property values exmaples include the 

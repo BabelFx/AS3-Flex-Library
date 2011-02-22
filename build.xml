@@ -43,7 +43,8 @@
 			<library-path file="${FLEX_HOME}/frameworks/libs/flash-integration.swc" append="true"/>
 
 			<library-path dir="${FLEX_HOME}/frameworks/locale/${LOCALE}" includes="*" append="true"/>
-
+			<namespace uri="library://ns.babelfx.org/l10n/flex/" manifest="${SOURCE_DIR}/manifest.xml" />
+			<include-namespaces>library://ns.babelfx.org/l10n/flex/</include-namespaces>
 		</compc>
 	</target>
 

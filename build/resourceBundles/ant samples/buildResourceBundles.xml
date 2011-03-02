@@ -1,5 +1,5 @@
 <project name="Localization Resource Compiler" default="build">
-	<property file="build.properties"/>
+	<property file="rb.properties"/>
 	
 	<!-- Threading Properties -->
 	<!-- Import Flex Ant Tasks -->

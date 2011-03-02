@@ -11,9 +11,9 @@
     <classEntry path="com.asfusion.mate.utils.debug.LogInfo"/>
     <classEntry path="com.asfusion.mate.utils.debug.LogTypes"/>
     <classEntry path="com.codecatalyst.factory.ClassFactory"/>
-    <classEntry path="com.codecatalyst.factory.ClassUtil"/>
-    <classEntry path="com.codecatalyst.factory.ItemRendererFactory"/>
-    <classEntry path="com.codecatalyst.factory.UIClassFactory"/>
+    <classEntry path="com.codecatalyst.util.ClassUtil"/>
+    <classEntry path="com.codecatalyst.util.EventDispatcherUtil"/>
+    <classEntry path="com.codecatalyst.util.PropertyUtil"/>
     <classEntry path="com.mindspace.l10n.commands.ExternalLocaleCommand"/>
     <classEntry path="com.mindspace.l10n.commands.ILocaleCommand"/>
     <classEntry path="com.mindspace.l10n.commands.LocaleCommand"/>

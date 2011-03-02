@@ -515,8 +515,8 @@ package com.mindspace.l10n.maps
 			if (_commandFactory && _commandFactory is ClassFactory) {
 				
 				if (ClassFactory(_commandFactory).properties == null) {
-					var clazz : Class = ClassFactory(_commandFactory).generator;
-					ClassFactory(_commandFactory).properties = {log:LocaleLogger.getLogger(clazz, _isCustomFactory)}
+					var clazz : Class = ClassFactory(_commandFactory).generatorClazz;
+					ClassFactory(_commandFactory).properties = { log : LocaleLogger.getLogger(clazz, _isCustomFactory) };
 				}
 				
 				enableLog = val;

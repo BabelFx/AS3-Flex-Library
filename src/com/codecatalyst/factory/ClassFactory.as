@@ -168,7 +168,7 @@ package com.codecatalyst.factory
 			
 			// Add event listeners [if any handlers are configured AND the instance is an IEventDispatcher]
 			
-			EventDispatcherUtil.addEventListeners( IEventDispatcher( instance ), eventListeners, false, 0, true );
+			EventDispatcherUtil.addEventListeners(instance as IEventDispatcher, eventListeners, false, 0, true );
 			
 			return instance;
 		}

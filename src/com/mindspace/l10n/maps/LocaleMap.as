@@ -216,9 +216,10 @@ package com.mindspace.l10n.maps
 			var oldValue:Boolean = _includeDerivatives;
 	        if (oldValue !== value)
 	        {
-	        	_includeDerivatives = value;
+	        	_includeDerivatives       = value;
 	        	includeDerivativesChanged = true;
-	        	validateNow()
+				
+	        	if (_isInitialized == true) validateNow();
 	        }
 		}
 
@@ -274,6 +275,8 @@ package com.mindspace.l10n.maps
 				registerAll();
 				listenForCreationComplete(haveTargets);
 				listenForSprites(haveTargets);
+				
+				includeDerivativesChanged = false;
 			}
 		}
 
@@ -383,6 +386,33 @@ package com.mindspace.l10n.maps
 			listenForDerivatives(active);
 		}
 		
+		/**
+		 * If a class has already been registered, then listen for instantiations of
+		 * subclasses (or derivative classes) for that class.
+		 * 
+		 * NOTE: this option suffers a performance impact since EVERY component addedToStage or creationComplete
+		 *       will then be checked as a possible derivative.
+		 *  
+		 * @param active
+		 */
+		protected function listenForDerivatives(active:Boolean):void {
+			// Listen for creation of derivative instances of targets...
+			if(includeDerivativesChanged || !active) {
+				
+				
+				if( includeDerivatives && active ) {
+
+					_logger.debug("listenForDerivatives() Attaching listener for Derivative creationComplete");
+					_dispatcher.addEventListener( InjectorEvent.INJECT_DERIVATIVES, onCreationComplete_Derivative, false, 0, true);
+					
+				} else {
+					_logger.debug("listenForDerivatives() Removing listener for Derivative creationComplete");
+					_dispatcher.removeEventListener( InjectorEvent.INJECT_DERIVATIVES, onCreationComplete_Derivative );
+				}
+			}						
+		}
+		
+		
 		private function addListenerProxy(eventDispatcher:IEventDispatcher, type:String = null):ListenerProxy {
 			var listenerProxy:ListenerProxy = _listenerProxies[eventDispatcher];
 			
@@ -412,22 +442,6 @@ package com.mindspace.l10n.maps
 		}
 		
 
-		protected function listenForDerivatives(active:Boolean):void {
-			// Listen for creation of derivative instances of targets...
-			if(includeDerivativesChanged || !active) {
-				includeDerivativesChanged = false;
-				
-				if(includeDerivatives && active) {
-					_logger.debug("listenForDerivatives() Attaching listener for Derivative creationComplete");
-					_dispatcher.addEventListener( InjectorEvent.INJECT_DERIVATIVES, onCreationComplete_Derivative, false, 0, true);
-				} else {
-					_logger.debug("listenForDerivatives() Removing listener for Derivative creationComplete");
-					_dispatcher.removeEventListener( InjectorEvent.INJECT_DERIVATIVES, onCreationComplete_Derivative );
-				}
-			}						
-		}
-		
-		
 		// ************************************************************************************************
 		//  CreationComplete EventHandlers
 		// ************************************************************************************************
@@ -472,14 +486,13 @@ package com.mindspace.l10n.maps
 		 * This method fires an event announcing that a target instance is READY (creationComplete).
 		*/
 		protected function onCreationComplete_Target(event:Event, logIt:Boolean=true):void {
-			var injectorTarget 	: Object = kevValueFrom(event,"injectorTarget") as Object;
-			var uid			 	: *      = kevValueFrom(event,"uid");
+			var instance 	: Object = kevValueFrom(event,"injectorTarget") as Object;
+			var uid			: *      = kevValueFrom(event,"uid");
 			
 			if (logIt == true) {
-				var id 			: String = (uid != null) ? uid : getQualifiedClassName(injectorTarget); 
-				_logger.debug("onCreationComplete_Target() for '{0}'",id);	
+				_logger.debug("onCreationComplete_Target() for '{0}'", uid || getQualifiedClassName(instance));	
 			}
-			announceTargetReady(injectorTarget);
+			announceTargetReady(instance);
 		}
 
 		/**
@@ -487,12 +500,12 @@ package com.mindspace.l10n.maps
 		 * derivative class the injection gets triggered
 		 */ 
 		protected function onCreationComplete_Derivative( event:Event ):void {
-			var injectorTarget 	: Object = kevValueFrom(event,"injectorTarget") as Object;
-			var uid			 	: *      = kevValueFrom(event,"uid");
+			var instance : Object = kevValueFrom(event,"injectorTarget") as Object;
+			var uid		 : *      = kevValueFrom(event,"uid");
 			
 			if( _targets ) {
-				for each( var currentTarget:* in _targets) {
-					var isDerivative : Boolean = InjectorUtils.isDerivative( injectorTarget, currentTarget  );
+				for each( var entry:* in _targets) {
+					var isDerivative : Boolean = InjectorUtils.isDerivative( instance, entry  );
 					
 					if( isDerivative == true )   {
 						_logger.debug("onCreationComplete_Derivative() for '{0}'", uid);

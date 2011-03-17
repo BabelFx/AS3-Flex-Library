@@ -33,35 +33,35 @@ package com.mindspace.l10n.utils
 		 * Check if the current object is a derivative class and return a boolean value
 		 * true / false.
 		 */
-		 static public function isDerivative( injectorTarget:Object, targetClass:* ):Boolean {
+		 static public function isDerivative( instance:Object, derivativeClass:* ):Boolean {
 		 	var foundDerivative:Boolean = false;
 		 	
-		 	if( targetClass && injectorTarget ) {
-		 	
-			 	var compareClass:Class = ( targetClass is Class ) ? targetClass : getDefinitionByName( targetClass ) as Class;
-			 	if(compareClass!=null && (injectorTarget is compareClass))
+		 	if( derivativeClass && instance ) {
+			 	var compareClass:Class = ( derivativeClass is Class ) ? derivativeClass : getDefinitionByName( derivativeClass ) as Class;
+				
+			 	if(compareClass && (instance is compareClass))
 			 	{
 					// So is in the inheritance scope... but is it the SAME class?
-			 		var targetClassName:String = getClazzName( injectorTarget as Class );
-			 		var compareClassName:String = getClazzName( compareClass );
+			 		var derivativeClassName:String = getClazzName( instance as Class );
+			 		var compareClassName   :String = getClazzName( compareClass );
 					
-			 		foundDerivative = ( targetClassName != compareClassName );
+			 		foundDerivative = ( derivativeClassName != compareClassName );
 			 	}
 			}
 		 
 		 	return foundDerivative;
 		 }
 		 
-		 static public function isSameClass(injectorTarget:Class, targetClass:Class):Boolean {
+		 static public function isSameClass(instance:Class, derivativeClass:Class):Boolean {
 		 	var results : Boolean = false;
 			
 			
-			 	if( injectorTarget!=null && targetClass!=null )
+			 	if( instance!=null && derivativeClass!=null )
 			 	{
-			 		var injectorClassName :String = getClazzName( injectorTarget );
-			 		var targetClassName   :String = getClazzName( targetClass );
+			 		var injectorClassName   :String = getClazzName( instance );
+			 		var derivativeClassName :String = getClazzName( derivativeClass );
 					
-			 		results = ( injectorClassName == targetClassName );
+			 		results = ( injectorClassName == derivativeClassName );
 			 	}
 				
 		 	return results;

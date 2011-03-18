@@ -75,28 +75,58 @@ package com.mindspace.l10n.injectors
 		 }   
 		 public function set target(src:Object):void {
 		 	if (src != _target) {
-				if (src is Class) {
-			 		_target = src as Class;
-			 		
-				 	// Register class with LocaleMap, to be notified of creationComplete for instances
-					if (_target && map) map.addTarget(_target);
+				if ((src as Array) || (src as Class)) {
+					
+				 	// Register class(es) with LocaleMap, to be notified of creationComplete for instances
+					_target = addToMapRegistry(src); 
+					
 				} else {
 					// We have a target instance instead of a target Class...
 					// use it but also register its Class for future instantiations...
 					var qualifiedName : String = getQualifiedClassName(src);
 					var clazz 		  : Class  = getDefinitionByName(qualifiedName) as Class;
 					
-					_target = clazz;
-					if (map != null) map.addTarget(clazz);
+					_target ||= [ ];
+					_target.concat( addToMapRegistry(clazz) );
 					
 					configureInstance(src);
 				}
 			}
 		 }
 		 
-		 private var _target : Class = null;
+		 private var _target : Array = null;
 		 
 		 
+		 
+		 private function addToMapRegistry(registry:Object=null):Array {
+			 if (!_map || !registry) return [ ];
+
+			 var items : Array = (registry as Array) ?  registry as Array  :
+				                 (registry as Class) ? [registry as Class] :  [ ];
+			 
+			 for each (var clazz:Class in items) {
+				_map.addTarget(clazz);				 
+			 }
+			 
+			 return items;
+		 }
+		 
+		 private function isTargetInstance(inst:Object):Boolean {
+			 var result : Boolean = false;
+			 
+			 if ((inst is Array) || (inst is Class)) return result;
+			 
+			 _target ||= [ ];
+			 
+			 for each (var it:Class in _target) {
+				 if ((inst as it) != null) {
+					 result = true;
+					 break;
+				 }
+			 }
+			 
+			 return result;
+		 }
 		 
 	     /**
 	      * LocaleMap reference used to attach listener for  
@@ -114,7 +144,7 @@ package com.mindspace.l10n.injectors
 		 		_map = src;
 		 		_map.addEventListener(LocaleMapEvent.TARGET_READY,onInstanceCreationComplete,false,2);
 
-				if (_target != null) _map.addTarget(_target);
+				addToMapRegistry(_target);
 			}
 		 }
 	     private var _map             : LocaleMap   = null;
@@ -165,7 +195,7 @@ package com.mindspace.l10n.injectors
 			this.map = parent;
 			
 			// Properly init target instances if not already configured...
-			if ((target == null) && (_instances.length > 0)) {
+			if ((_target == null) && (_instances.length > 0)) {
 				for each (var it:Object in _instances) {
 					configureInstance(it);
 				}
@@ -426,7 +456,7 @@ package com.mindspace.l10n.injectors
 						if (proxy == null) continue;		
 						
 						if (
-							  ((proxy.target == null) && (target is Class)       && (inst is Class(target)))       || 
+							  ( (proxy.target == null) && isTargetInstance(inst) )       || 
 							  ((proxy.target != null) && (proxy.target is Class) && (inst is Class(proxy.target)))
 						   ){
 							// When targetID is specified, only cache if ID matches 
@@ -443,7 +473,7 @@ package com.mindspace.l10n.injectors
 				} else {
 					// Rare case where no proxies are specified, but a targetClass is still specified...
 					// Useful to trigger localChange events
-					if (target && (target is Class) && (inst is Class(target))) results = true;
+					results = isTargetInstance(inst);
 				}
 			}
 				

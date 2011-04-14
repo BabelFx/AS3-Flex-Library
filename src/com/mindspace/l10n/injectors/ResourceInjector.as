@@ -41,6 +41,7 @@ package com.mindspace.l10n.injectors
 	import mx.logging.ILogger;
 	import mx.resources.IResourceManager;
 	import mx.resources.ResourceManager;
+	import mx.styles.IStyleClient;
 	import mx.utils.StringUtil;
 	
 	/**
@@ -445,9 +446,21 @@ package com.mindspace.l10n.injectors
 				if (val == null) {
 				  logError(map, ERROR_KEY_VALUE_MISSING);
 				} else {
+				  
+				  if (ui.hasOwnProperty(property) == true) 	{
+					  // The target property could be a function...
+					  var accessor : Function = ui[property] as Function;
+					  
+					  if (accessor != null)  accessor.apply(ui,[val]);
+					  else					 ui[property] = val;
+					  
+				  }
+				  else if (ui is IStyleClient) {
+					  // If not a property or a setter, then check if a style should be applied
+					  (ui as IStyleClient).setStyle(property,val);
+				  }
+				  
 				  log.debug("inject '{0}' into '{1}' from resource {2}::{3}",val,map.property,map.bundleName,map.key);
-				  if (ui.hasOwnProperty(property) == true) 	ui[property] = val;
-				  else if (ui is UIComponent)					(ui as UIComponent).setStyle(property,val);
 				}
 			}
 			

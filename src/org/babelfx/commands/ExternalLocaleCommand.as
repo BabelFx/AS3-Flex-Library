@@ -1,6 +1,6 @@
-package com.mindspace.l10n.commands
+package org.babelfx.commands
 {
-	import com.mindspace.l10n.events.LocaleEvent;
+	import org.babelfx.events.LocaleEvent;
 	
 	import flash.events.IEventDispatcher;
 	import flash.net.*;

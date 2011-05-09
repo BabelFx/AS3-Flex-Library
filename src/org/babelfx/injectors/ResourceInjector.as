@@ -17,15 +17,8 @@ Author: Thomas Burleson, Principal Architect
                 
 @ignore
 */
-package com.mindspace.l10n.injectors
+package org.babelfx.injectors
 {
-	 import com.mindspace.l10n.events.LocaleMapEvent;
-	 import com.mindspace.l10n.maps.LocaleMap;
-	 import com.mindspace.l10n.proxys.ITargetInjectable;
-	 import com.mindspace.l10n.proxys.PropertyProxy;
-	 import com.mindspace.l10n.proxys.ResourceMap;
-	 import com.mindspace.l10n.proxys.ResourceProxy;
-	 
 	 import flash.events.Event;
 	 import flash.events.IEventDispatcher;
 	 import flash.utils.getDefinitionByName;
@@ -35,27 +28,34 @@ package com.mindspace.l10n.injectors
 	 import mx.events.PropertyChangeEvent;
 	 import mx.events.StateChangeEvent;
 	 import mx.resources.IResourceManager;
+	 
+	 import org.babelfx.events.LocaleMapEvent;
+	 import org.babelfx.interfaces.ITargetInjectable;
+	 import org.babelfx.maps.LocaleMap;
+	 import org.babelfx.proxys.PropertySetter;
+	 import org.babelfx.proxys.ResourceSetter;
 
+
+	[Event(name="change",type="flash.events.Event")]
+	[DefaultProperty("registry")]
+	
 	/**
 	 * Sample MXML Usage.
 	 * @code
 	 * 
-	 *  <LocaleMap>
-	 *    <SmartResourceInjector target="{DocumentViewer}" bundle="registration">
-	 *       <ResourceProxy 	property  = "vacuum.lblButton.label" 
+	 *  &lt;LocaleMap&gt;
+	 *    &lt;ResourceInjector target="{DocumentViewer}" bundle="registration"&gt;
+	 *       &lt;ResourceSetter 	property  = "vacuum.lblButton.label" 
 	 * 		  				    key       = "documentviewer.relatedVideos" 
 	 * 							bundle    = "user" 
-	 * 							parameters= "{[_model.userName]}"  />
-	 *	  </SmartResourceInjector>
-	 *  </LocaleMap>
+	 * 							parameters= "{[_model.userName]}"  /&gt;
+	 *	  &lt;/ResourceInjector&gt;
+	 *  &lt;/LocaleMap&gt;
 	 *  
 	 * @author thomasburleson
 	 * 
 	 */
-	[DefaultProperty("registry")]
-	[Event(name="change",type="flash.events.Event")]
-	  
-	public class SmartResourceInjector extends ResourceInjector {
+	public class ResourceInjector extends AbstractInjector {
 		
 		/**
 		 * Special accessor to expose all collected instances  
@@ -160,7 +160,7 @@ package com.mindspace.l10n.injectors
 	      * @param bundleName
 	      * 
 	      */
-	     public function SmartResourceInjector( target       : Object           = null, 
+	     public function ResourceInjector( target       : Object           = null, 
 	     										bundleName   : String          = "", 
 	     										localeManager: IResourceManager= null, 
 	     										map          : LocaleMap  = null)  {
@@ -176,7 +176,7 @@ package com.mindspace.l10n.injectors
 	    // *********************************************************************************
 	   
 	   	 /**
-	   	  * Method is auto-invoked during MXML initialization. Note: if a SmartResourceInjector instance
+	   	  * Method is auto-invoked during MXML initialization. Note: if a ResourceInjector instance
 	   	  * was programmatically instantiated (not as a tag), then this method is never called.
 	   	  * 
 	   	  * @param document	Owner for this tag instance
@@ -186,13 +186,13 @@ package com.mindspace.l10n.injectors
 	   	 override public function initialized(document:Object, id:String):void {
 	   	 	var parent : LocaleMap = document as LocaleMap;
 	   	 	if (parent == null) {
-	   	 		// Can only use SmartResourceInjectors inside LocaleMap
+	   	 		// Can only use ResourceInjectors inside LocaleMap
 	   	 		throw new Error(INVALID_USAGE);
 	   	 	}
 	   	 	
 	   	 	// The map owner is usually a mx.core.Container
-	   	 	super.initialized(parent.owner,id);
 			this.map = parent;
+	   	 	super.initialized(parent.owner,id);
 			
 			// Properly init target instances if not already configured...
 			if ((_target == null) && (_instances.length > 0)) {
@@ -215,7 +215,7 @@ package com.mindspace.l10n.injectors
 			if (target == null) {
 				_instances = [];
 				clearProxyTargets();
-			} else if ((target is ResourceMap) != true) {
+			} else if ((target is ResourceSetter) != true) {
 				// Splice remove the specified target instance
 				var buffer : Array = [];
 				for each (var it:Object in _instances) {
@@ -262,13 +262,13 @@ package com.mindspace.l10n.injectors
 					// Listen for changes to "target" so "callbacks" will trigger updates to  with localization values.
 		 			_smartCache.push(it);
 					
-		 			if (it is ResourceProxy) {
-						ResourceProxy(it).addEventListener(PropertyChangeEvent.PROPERTY_CHANGE,onRegistrationChanges,false,0,true);	
-						if (ResourceProxy(it).state != "")  _listenForStateChanges = true;
+		 			if (it is ResourceSetter) {
+						IEventDispatcher(it).addEventListener(PropertyChangeEvent.PROPERTY_CHANGE,onRegistrationChanges,false,0,true);	
+						if (ResourceSetter(it).state != "")  _listenForStateChanges = true;
 					}
-					else if (it is PropertyProxy) {
-						PropertyProxy(it).owner = this;
-						if (PropertyProxy(it).state != "")  _listenForStateChanges = true;
+					else if (it is PropertySetter) {
+						PropertySetter(it).owner = this;
+						if (PropertySetter(it).state != "")  _listenForStateChanges = true;
 					} 
 		 		}
 		 		else {
@@ -277,7 +277,7 @@ package com.mindspace.l10n.injectors
 		 	}
 		 	
 		 	// Pass the "standard" resourceMaps (or Objects) to ResourceInjector to build, cache, and manage
-		 	// Thus, the SmartResourceInjector supports "mixed" registry items (Objects & ResourceProxy)
+		 	// Thus, the ResourceInjector supports "mixed" registry items (Objects & ResourceSetter)
 		 	super.buildRegistry(hasTargets);
 		 	
 		}
@@ -313,7 +313,7 @@ package com.mindspace.l10n.injectors
 		
 		/**
 		 * An instance of the "target" class has been instantiated and is ready.
-		 * Cache this instance, then iterate all "injectable" ResourceProxy instances
+		 * Cache this instance, then iterate all "injectable" ResourceSetter instances
 		 * and update the proxied localized settings...
 		 * 
 		 * @param event 
@@ -338,7 +338,8 @@ package com.mindspace.l10n.injectors
 	     * 
 	     */
 	    override protected function onTargetStateChange(event:StateChangeEvent):void {
-				log.debug("onTargetStateChange({0})",event.newState);
+				super.onTargetStateChange(event);
+				
 	    		validateNow(event.target);
 	    }
 	    
@@ -364,7 +365,7 @@ package com.mindspace.l10n.injectors
 	     * 
 	     */
 	    override protected function onRegistrationChanges(event:PropertyChangeEvent):void {
-	    	var rProxy : ResourceProxy = event.target as ResourceProxy;
+	    	var rProxy : ResourceSetter = event.target as ResourceSetter;
 			if (rProxy != null) {
 				// If the proxy just was assigned a target value that is a Class
 				// reference, then do something special...
@@ -407,7 +408,7 @@ package com.mindspace.l10n.injectors
 	    }
 		
 		/**
-		 * 	Check if the specified registry item is a ResourceProxy which requires
+		 * 	Check if the specified registry item is a ResourceSetter which requires
 		 *  runtime injection of "target" instances.
 		 * 
 		 * @param it Registry item for Injector. 
@@ -415,13 +416,13 @@ package com.mindspace.l10n.injectors
 		 * 
 		 */
 		private function wantsInjection(it:Object):Boolean {
-			// Must be instance of ResourceProxy WITH no target assigned...
+			// Must be instance of ResourceSetter WITH no target assigned...
 			return shouldUseInjectorTarget(it) || isProxyTargetClass(it);
 		} 
 		
 		private function shouldUseInjectorTarget(it:Object):Boolean {
-			// Must be instance of ResourceProxy WITH no target assigned...
-			// So the target attribute in <SmartResourceInjector will be used
+			// Must be instance of ResourceSetter WITH no target assigned...
+			// So the target attribute in <ResourceInjector will be used
 			
 			return ((it is ITargetInjectable) && (ITargetInjectable(it).target == null));
 		}
@@ -434,8 +435,8 @@ package com.mindspace.l10n.injectors
 		}
 		
 		/**
-		 * This allows <ResourceProxy target="{<Class>}" .../> so the target attribute is used as 
-		 * override for <SmartResourceInjector target="{<Class>}" />
+		 * This allows <ResourceSetter target="{<Class>}" .../> so the target attribute is used as 
+		 * override for <ResourceInjector target="{<Class>}" />
 		 *   
 		 * @param it
 		 */
@@ -460,8 +461,8 @@ package com.mindspace.l10n.injectors
 							  ((proxy.target != null) && (proxy.target is Class) && (inst is Class(proxy.target)))
 						   ){
 							// When targetID is specified, only cache if ID matches 
-							var targetID : String = (proxy is ResourceProxy) ? ResourceProxy(proxy).targetID : 
-													(proxy is PropertyProxy) ? PropertyProxy(proxy).targetID : "";
+							var targetID : String = (proxy is ResourceSetter) ? ResourceSetter(proxy).targetID : 
+													(proxy is PropertySetter) ? PropertySetter(proxy).targetID : "";
 	
 							results = (targetID == "") 			? true 						:
 							          inst.hasOwnProperty("id")	? (inst['id'] == targetID)	: false;
@@ -501,8 +502,8 @@ package com.mindspace.l10n.injectors
 	    // *********************************************************************************
 	    
 		/**
-		  * Registered instances of ResourceProxy where "target" is initially null; which means
-		  * these proxies want runtime injection of target instances from SmartResourceInjector 
+		  * Registered instances of ResourceSetter where "target" is initially null; which means
+		  * these proxies want runtime injection of target instances from ResourceInjector 
 		  */
 		 private var _smartCache      		: Array            = [];
 	     
@@ -519,7 +520,7 @@ package com.mindspace.l10n.injectors
 		  */		 
 		 private var _listenForStateChanges : Boolean    = false;
 		 
-		 static private const INVALID_USAGE : String     = "SmartResourceInjector can only be used with LocaleMaps";     
+		 static private const INVALID_USAGE : String     = "ResourceInjector can only be used with LocaleMaps";     
 	}
 }
 

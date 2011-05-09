@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<flexLibProperties includeAllClasses="false" version="3">
+<flexLibProperties includeAllClasses="false" useMultiPlatformConfig="false" version="3">
   <includeClasses>
     <classEntry path="com.asfusion.mate.core.Binder"/>
     <classEntry path="com.asfusion.mate.core.GlobalDispatcher"/>
@@ -14,24 +14,23 @@
     <classEntry path="com.codecatalyst.util.ClassUtil"/>
     <classEntry path="com.codecatalyst.util.EventDispatcherUtil"/>
     <classEntry path="com.codecatalyst.util.PropertyUtil"/>
-    <classEntry path="com.mindspace.l10n.commands.ExternalLocaleCommand"/>
-    <classEntry path="com.mindspace.l10n.commands.ILocaleCommand"/>
-    <classEntry path="com.mindspace.l10n.commands.LocaleCommand"/>
-    <classEntry path="com.mindspace.l10n.events.LocaleEvent"/>
-    <classEntry path="com.mindspace.l10n.events.LocaleMapEvent"/>
-    <classEntry path="com.mindspace.l10n.injectors.ResourceInjector"/>
-    <classEntry path="com.mindspace.l10n.injectors.SmartResourceInjector"/>
-    <classEntry path="com.mindspace.l10n.maps.AbstractMap"/>
-    <classEntry path="com.mindspace.l10n.maps.LocaleMap"/>
-    <classEntry path="com.mindspace.l10n.proxys.ITargetInjectable"/>
-    <classEntry path="com.mindspace.l10n.proxys.PropertyProxy"/>
-    <classEntry path="com.mindspace.l10n.proxys.ResourceMap"/>
-    <classEntry path="com.mindspace.l10n.proxys.ResourceProxy"/>
-    <classEntry path="com.mindspace.l10n.utils.InjectorUtils"/>
-    <classEntry path="com.mindspace.l10n.utils.debug.LocaleLogger"/>
+    <classEntry path="org.babelfx.commands.ExternalLocaleCommand"/>
+    <classEntry path="org.babelfx.interfaces.ILocaleCommand"/>
+    <classEntry path="org.babelfx.commands.LocaleCommand"/>
+    <classEntry path="org.babelfx.events.LocaleEvent"/>
+    <classEntry path="org.babelfx.events.LocaleMapEvent"/>
+    <classEntry path="org.babelfx.injectors.AbstractInjector"/>
+    <classEntry path="org.babelfx.injectors.ResourceInjector"/>
+    <classEntry path="org.babelfx.maps.AbstractMap"/>
+    <classEntry path="org.babelfx.maps.LocaleMap"/>
+    <classEntry path="org.babelfx.interfaces.ITargetInjectable"/>
+    <classEntry path="org.babelfx.proxys.PropertySetter"/>
+    <classEntry path="org.babelfx.proxys.ResourceSetter"/>
+    <classEntry path="org.babelfx.utils.InjectorUtils"/>
+    <classEntry path="org.babelfx.utils.debug.LocaleLogger"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests>
-    <namespaceManifestEntry manifest="manifest.xml" namespace="library://ns.babelfx.org/l10n/flex/"/>
+    <namespaceManifestEntry manifest="manifest.xml" namespace="http://l10n.babelfx.org/"/>
   </namespaceManifests>
 </flexLibProperties>

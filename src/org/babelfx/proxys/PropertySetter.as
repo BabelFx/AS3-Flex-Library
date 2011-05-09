@@ -17,17 +17,18 @@ Author: Thomas Burleson, Principal Architect
                 
 @ignore
 */
-package com.mindspace.l10n.proxys 
+package org.babelfx.proxys 
 {
 	import com.asfusion.mate.core.Binder;
-	import com.mindspace.l10n.utils.InjectorUtils;
+	import org.babelfx.utils.InjectorUtils;
 	
 	import flash.events.IEventDispatcher;
 	import flash.utils.Dictionary;
 	
 	import mx.core.IMXMLObject;
 	import mx.utils.StringUtil;
-	import com.mindspace.l10n.injectors.SmartResourceInjector;
+	import org.babelfx.injectors.ResourceInjector;
+	import org.babelfx.interfaces.ITargetInjectable;
 
 	/**
 	 * PropertyProxy sets a value from an object (source) to a destination (target). 
@@ -37,7 +38,7 @@ package com.mindspace.l10n.proxys 
 	 * If the source key is bindable, the PropertyProxy will bind  
 	 * the source to the targetKey. Otherwise, it will only set the property once.
 	 */
-	public class PropertyProxy implements IMXMLObject, com.mindspace.l10n.proxys.ITargetInjectable
+	public class PropertySetter implements IMXMLObject, org.babelfx.interfaces.ITargetInjectable
 	{
 		
 		// ************************************************************************************************************
@@ -200,7 +201,7 @@ package com.mindspace.l10n.proxys 
 	
 		private function notifyOwner():void {
 			if ((target == null) || (target is Class)) {
-				// Ask the SmartResourceInjector to iterate all instances of "target"
+				// Ask the ResourceInjector to iterate all instances of "target"
 				// and apply to this proxy...
 				if (_owner != null) _owner.validateNow();				
 			} else {
@@ -216,16 +217,16 @@ package com.mindspace.l10n.proxys 
 		
 		private var _source		: Object 	 = null;
 		private var _target		: Object	 = null;
-		private var _owner      : SmartResourceInjector = null;
+		private var _owner      : ResourceInjector = null;
 		
 		/**
-		 * Special mutator to cache reference to SmartResourceInjector
+		 * Special mutator to cache reference to ResourceInjector
 		 * When "this.source" changes, the owner needs to re-validate().
 		 *  
-		 * @param val Owning instance of SmartResourceInjector
+		 * @param val Owning instance of ResourceInjector
 		 * 
 		 */
-		public function set owner(val : SmartResourceInjector):void {
+		public function set owner(val : ResourceInjector):void {
 			if (val != _owner) {
 				_owner = val;
 				notifyOwner();

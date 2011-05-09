@@ -1,14 +1,13 @@
 <?xml version="1.0"?>
 <componentPackage>    
-	<component class="com.mindspace.l10n.injectors.SmartResourceInjector"/>
-	<component class="com.mindspace.l10n.injectors.ResourceInjector"/>
+	<component class="org.babelfx.maps.LocaleMap"/>
+	<component class="org.babelfx.commands.ExternalLocaleCommand" />
 
-	<component class="com.mindspace.l10n.proxys.PropertyProxy"/>
-	<component class="com.mindspace.l10n.proxys.ResourceProxy"/>
+	<component class="org.babelfx.injectors.ResourceInjector"/>
 
-	<component class="com.mindspace.l10n.maps.LocaleMap"/>
-	<component class="com.mindspace.l10n.commands.ExternalLocaleCommand" />
-	
+	<component class="org.babelfx.proxys.PropertySetter"/>
+	<component class="org.babelfx.proxys.ResourceSetter"/>
+
 	<component class="com.codecatalyst.factory.ClassFactory" />
-	
+		
 </componentPackage>

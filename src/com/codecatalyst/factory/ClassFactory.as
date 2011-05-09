@@ -33,7 +33,7 @@ package com.codecatalyst.factory
 
 	/**
 	 * ClassFactory has significant improvements upon the mx.core.ClassFactory:
-	 * 
+	 *  
 	 * 	1) The generator specified can be a Class, String, IFactory, or Object instance.
 	 * 	2) Constructor parameters are supported.
 	 * 	3) Initialization properties [key/value pairs] are auto-assigned at each instantiation.
@@ -48,13 +48,13 @@ package com.codecatalyst.factory
 	 * @see UIComponentFactory
 	 * @see DataRendererFactory
 	 * 
-	 * @example
-	 * <fe:ClassFactory
+	 * @code
+	 * &lt;fe:ClassFactory
 	 * 			id="factory
 	 * 			generator="{ flash.display.Bitmap }"
 	 * 			parameters="{ [null, true]  }"
 	 * 			properties="{ { smoothing:true, filters:[ new DropShadowFilter() ]  } }" 
-	 * 			xmlns:fe="http://www.codecatalyst.com/2011/flex-extensions" />
+	 * 			xmlns:fe="http://www.codecatalyst.com/2011/flex-extensions" /&gt;
 	 *  
 	 * @author Thomas Burleson
 	 * @author John Yanarella
@@ -91,9 +91,10 @@ package com.codecatalyst.factory
 		
 		/**
 		 *  Public setter to dynamically prepare a class instance generator
-		 *  from a variety of source types.
+		 *  from a variety of source types; source types could be a IFactory, Class, 
+		 *  or String, or Object instance. 
 		 * 
-		 *  @param source   Object which could be a IFactory, Class, or String  
+		 *  @param source   Object  
 		 */
 		public function set generator (source:Object) : void {
 			// Save for later
@@ -199,13 +200,18 @@ package com.codecatalyst.factory
 		}
 		
 		
+		/**
+		 * @private 
+		 */
 		protected function get generatorFactory():IFactory {
 			return _generator as IFactory;
 		}
 		
 		/**
 		 * A Class that will be used as a template to create instances upon demand. If the generator type is a 
-		 * String or object instance then Class is dynamically determined.  
+		 * String or object instance then Class is dynamically determined.
+		 * 
+		 * @private  
 		 */
 		protected var _generator : * = null;
 

@@ -1,34 +1,20 @@
-/*
-Copyright 2009  Mindspace LLC, Thomas Burleson
+////////////////////////////////////////////////////////////////////////////////
+//
+//  THE MINDSPACE GROUP, LLC
+//  Copyright 2008-2011 Mindspace 
+//  All Rights Reserved.
+//
+//  NOTICE: Mindspace permits you to use, modify, and distribute this file
+//  in accordance with the terms of the license agreement accompanying it.
+//
+////////////////////////////////////////////////////////////////////////////////
 
-Licensed under the Apache License, Version 2.0 (the "License"); 
-you may not use this file except in compliance with the License. Y
-ou may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0 
-
-Unless required by applicable law or agreed to in writing, s
-oftware distributed under the License is distributed on an "AS IS" BASIS, 
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-See the License for the specific language governing permissions and limitations under the License
-
-Author: Thomas Burleson, Principal Architect
-        thomas burleson at g mail dot com
-                
-@ignore
-*/
-package com.mindspace.l10n.maps
+package org.babelfx.maps
 {
 	import com.asfusion.mate.core.GlobalDispatcher;
 	import com.asfusion.mate.core.ListenerProxy;
 	import com.asfusion.mate.events.InjectorEvent;
 	import com.codecatalyst.factory.ClassFactory;
-	import com.mindspace.l10n.commands.ILocaleCommand;
-	import com.mindspace.l10n.commands.LocaleCommand;
-	import com.mindspace.l10n.events.*;
-	import com.mindspace.l10n.injectors.ResourceInjector;
-	import com.mindspace.l10n.utils.InjectorUtils;
-	import com.mindspace.l10n.utils.debug.LocaleLogger;
 	
 	import flash.display.DisplayObject;
 	import flash.events.Event;
@@ -43,13 +29,86 @@ package com.mindspace.l10n.maps
 	import mx.logging.ILoggingTarget;
 	import mx.logging.LogEventLevel;
 	import mx.logging.targets.TraceTarget;
+	
+	import org.babelfx.commands.LocaleCommand;
+	import org.babelfx.events.*;
+	import org.babelfx.injectors.AbstractInjector;
+	import org.babelfx.interfaces.ILocaleCommand;
+	import org.babelfx.utils.InjectorUtils;
+	import org.babelfx.utils.debug.LocaleLogger;
 
-	[Event(name='localeChanging',type='com.mindspace.l10n.events.LocaleMapEvent')]
-	[Event(name='targetReady',	 type='com.mindspace.l10n.events.LocaleMapEvent')]
-	[Event(name='initialized',   type='com.mindspace.l10n.events.LocaleMapEvent')]
+	//--------------------------------------
+	//  Other metadata
+	//--------------------------------------
+	
+	/**
+	 *  Dispatched before the current locale will be changed.
+	 *  
+	 *  <p>The <code>commandFactory</code> will be used to create an instance of ILocaleCommand. Before the 
+	 *  <code>ILocaleCommand::execute</code> is invoked, this event announces that the locale will change soon.</p> 
+	 * 
+	 *  @eventType org.babelfx.events.LocaleMapEvent.LOCALE_CHANGING
+	 *  
+	 *  @langversion 3.0
+	 *  @playerversion Flash 9
+	 *  @playerversion AIR 1.1
+	 *  @productversion Flex 3
+	 */
+	[Event(name='localeChanging',type='org.babelfx.events.LocaleMapEvent')]
+
+	/**
+	 *  Dispatched when a new instance of a <code>ResourceInjector::target</code> is 
+	 *  ready for injection. All children <code>ResourceInjector</code>s listen
+	 *  for <code>LocaleMapEvent.TARGET_READY</code> events from the <code>LocaleMap</code> instance.
+	 *  
+	 *  @eventType org.babelfx.events.LocaleMapEvent.TARGET_READY
+	 *  
+	 *  @langversion 3.0
+	 *  @playerversion Flash 9
+	 *  @playerversion AIR 1.1
+	 *  @productversion Flex 3
+	 */
+	[Event(name='targetReady',	 type='org.babelfx.events.LocaleMapEvent')]
+	
+	/**
+	 *  Dispatched when the <code>LocaleMap</code> instance has been initialized. Currently
+	 *  only available via MXML instantiation; not with programmatic instantiation.
+	 *  
+	 *  @eventType org.babelfx.events.LocaleMapEvent.INITIALIZED
+	 *  
+	 *  @langversion 3.0
+	 *  @playerversion Flash 9
+	 *  @playerversion AIR 1.1
+	 *  @productversion Flex 3
+	 */
+	[Event(name='initialized',   type='org.babelfx.events.LocaleMapEvent')]
+	
+	
 	
 	[DefaultProperty("injectors")]
 	
+	
+	/**
+	 * The LocaleMap is a smart container for ResourceInjectors. It also provides mechanisms for notifications
+	 * of DisplayObject <code>creationComplete</code> events and <code>addedToStage</code> events.
+	 *
+	 * <p>Below are recommendations for usage:
+	 * <ul>
+	 * 	<li>The LocaleMap must be extended using MXML and instantiated using an MXML tag. AS3 programmatic instantiation has rudimentary support.</li>
+	 * 	<li>The LocaleMap subclass should be instantiated at the application-level, module-level, or a configuration level. Do not instantiate within a view component; as unexpected behaviour may manifest.</li>
+	 * </ul>
+	 * </p>
+	 * 
+	 * @mxml
+	 * 
+	 *  @see org.babelfx.maps.AbstractMap
+	 *  
+	 *  @langversion 3.0
+	 *  @playerversion Flash 9
+	 *  @playerversion AIR 1.1
+	 *  @productversion Flex 3
+	 * 
+	 */
 	public class LocaleMap extends AbstractMap  {
 		
 		// ************************************************************************************************
@@ -57,9 +116,24 @@ package com.mindspace.l10n.maps
 		// ************************************************************************************************
 		
 		[Bindable]
+		/**
+		 *  Property that enables logging for all BabelFx activity. If the user does not specify a custom <code>loggingTarget</code>,
+		 *  the a <code>TraceTarget</code> will be used to output to the console.
+		 * 
+		 *  @default false
+		 * 
+	     *  
+	     *  @langversion 3.0
+	     *  @playerversion Flash 9
+	     *  @playerversion AIR 1.1
+	     *  @productversion Flex 3
+		 */
 		public function get enableLog():Boolean {
 			return _debugEnabled;
 		}
+		/**
+		 *  @private
+		 */
 		public function set enableLog(val:Boolean):void {
 			_debugEnabled = val;
 			
@@ -75,10 +149,27 @@ package com.mindspace.l10n.maps
 		
 		
 		/**
-		 * Setter that accepts an TraceTarget instance or a ClassFactory for an ILoggingTarget generator
-		 *  
-		 * @param val ILoggingTarget or IFactory
+		 * Write-only property that allows developers to specify a custom LoggingTarget that will be used with <code>enableLogging</code> is <code>true</code>.
+		 * The <code>val</code> may be an ILoggingTarget instance, IFactory instance or a Class, String, Object reference that will be used by 
+		 * <code>ClassFactory::newInstance()</code>. The instance that is returned must implement the <code>mx.logging.ILoggingTarget</code>
+		 * interface.
 		 * 
+		 * @mxml
+		 * 
+		 * <pre>
+		 *    &lt;l10n:LocaleMap&gt;
+		 * 		&lt;l10n:loggingTarget&gt;
+		 * 				&lt;l10n:ClassFactory generator="{mx.logging.targets.TraceTarget}" properties="{{level:LogEventType.WARN + LogEventType.ERROR}}"
+		 * 		&lt;/l10n:logginTargets&gt;
+		 * 	  &lt;/l0n:LocaleMap&gt;
+		 * </pre>
+		 * 
+		 * @param val Object
+		 * 
+		 * @see com.codecatalyst.factory.ClassFactory
+		 * @see mx.logging.targets.TraceTarget
+		 *  
+		 * @langversion 3.0
 		 */
 		public function set loggingTarget(val : *):void {
 			if (val == null) return;	// Clear existing target not supported
@@ -99,22 +190,35 @@ package com.mindspace.l10n.maps
 		}
 		
 		/**
-		 * Factory method that allows developers to build and use custom resourceBundle loaders within the LocaleMap 
-		 * subclasses.
+		 * Write-only property that allows developers to implement and install custom loaders for external ResourceBundles.
+		 * The <code>val</code> may be an IFactory instance or a Class, String, Object reference that will be used by 
+		 * <code>ClassFactory::newInstance()</code>. 
 		 * 
-		 * @code
+		 * <p>The instance that is returned <b>must</b> implement the <code>org.babelfx.interfaces.ILocaleCommand</code>
+		 * interface.</p>
 		 * 
-		 *    <l10n:LocaleMap>
-		 * 		<l10n:commandFactory>
-		 * 				<mx:ClassFactory generator="{MyLocaleLoader}" properties="{loaderConfig}" />
-		 *      </l10n:commandFactory>
-		 * 		<l10n:loggingTarget>
-		 * 				<l10n:ClassFactory generator="{mx.logging.targets.TraceTarget}" properties="{{level:LogEventType.WARN + LogEventType.ERROR}}"
-		 * 		</l10n:logginTargets>
-		 * 	  </l0n:LocaleMap>
+		 * @mxml
+		 * 
+		 * <pre>
+		 *    &lt;l10n:LocaleMap&gt;
+		 * 		&lt;l10n:commandFactory&gt;
+		 * 			&lt;ClassFactory generator="{ExternalLocaleCommand}"&gt;
+		 *				&lt;properties>
+		 *					&lt;mx:Object externalPath="\{0\}.swf"/&gt;
+		 *				&lt;/properties&gt;
+		 *			&lt;/ClassFactory&gt;
+		 *      &lt;/l10n:commandFactory&gt;
+		 * 	  &lt;/l0n:LocaleMap&gt;
+		 * </pre>
+		 * 
+		 *  @param val The value of the constraint can be specified in either
+     	 *  of four (4) forms. It can be specified as an IFactory instance or it can be specified as a String, Class, or 
+		 *  Object instance that references a class that implements the ILocaleCommand interface or a IFactory instance.
+		 * 
+		 * @see com.codecatalyst.factory.ClassFactory
+		 * @see org.babelfx.interfaces.ILocaleCommand
 		 *  
-		 * @param val Class with interface ILocaleCommand or a IFactory instance...
-		 * 
+		 * @langversion 3.0
 		 */
 		public function set commandFactory(val:*):void {
 			if (val == null) return;
@@ -132,10 +236,11 @@ package com.mindspace.l10n.maps
 		}
 		
 		/**
-		 * An array of classes that, when an object is created, should trigger the <code>InjectorHandlers</code> to run. 
+		 * An array of classes that, when an object is created, should trigger the InjectorHandlers to run. 
 		 * 
 		 *  @default true
-		 * */
+		 * 
+		 */
 		public function get targets():*
 		{
 			return _targets;
@@ -232,14 +337,14 @@ package com.mindspace.l10n.maps
 
 		public function addInjectors(injectors:Array):void {
 			if (this.injectors != injectors) {
-				for each (var oit:ResourceInjector in injectors) {
+				for each (var oit:AbstractInjector in injectors) {
 					if (oit == null) continue;
 					oit.release();
 				}
 				
 				this.injectors = injectors;
 				
-				for each (var nit:ResourceInjector in injectors) {
+				for each (var nit:AbstractInjector in injectors) {
 					nit.initialized(this,"");
 				}
 				invalidateProperties();
@@ -553,7 +658,7 @@ package com.mindspace.l10n.maps
 	
 		private var _isInitialized				:Boolean = false;
 		
-		private var _dispatcher 				:GlobalDispatcher 	= new GlobalDispatcher();
+		private var _dispatcher 				:IEventDispatcher 	= new GlobalDispatcher();
 		private var _listenerProxies			:Dictionary 		= new Dictionary(true);
 
 		private var _localeCommand              :ILocaleCommand = null;

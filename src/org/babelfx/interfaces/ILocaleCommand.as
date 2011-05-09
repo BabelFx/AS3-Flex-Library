@@ -1,6 +1,6 @@
-package com.mindspace.l10n.commands
+package org.babelfx.interfaces
 {
-	import com.mindspace.l10n.events.LocaleEvent;
+	import org.babelfx.events.LocaleEvent;
 
 	public interface ILocaleCommand
 	{

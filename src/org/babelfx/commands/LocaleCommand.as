@@ -1,7 +1,7 @@
-package com.mindspace.l10n.commands
+package org.babelfx.commands
 {
-	import com.mindspace.l10n.events.LocaleEvent;
-	import com.mindspace.l10n.utils.debug.LocaleLogger;
+	import org.babelfx.events.LocaleEvent;
+	import org.babelfx.utils.debug.LocaleLogger;
 	
 	import flash.net.*;
 	import flash.system.Capabilities;
@@ -10,6 +10,7 @@ package com.mindspace.l10n.commands
 	import mx.managers.*;
 	import mx.resources.IResourceManager;
 	import mx.resources.ResourceManager;
+	import org.babelfx.interfaces.ILocaleCommand;
 	
 	public class LocaleCommand implements ILocaleCommand {	
 		

@@ -17,7 +17,8 @@ Author: Thomas Burleson, Principal Architect
                 
 @ignore
 */
-package com.mindspace.l10n.maps
+
+package org.babelfx.maps
 {
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
@@ -28,6 +29,8 @@ package com.mindspace.l10n.maps
 	import mx.events.FlexEvent;
 	import mx.events.PropertyChangeEvent;
 
+	[ExcludeClass]
+	
 	public class AbstractMap extends EventDispatcher implements IMXMLObject
 	{
 		public var id : String = "";

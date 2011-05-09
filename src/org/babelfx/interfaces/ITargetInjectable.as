@@ -17,7 +17,7 @@ Author: Thomas Burleson, Principal Architect
                 
 @ignore
 */
-package com.mindspace.l10n.proxys
+package org.babelfx.interfaces
 {
 	public interface ITargetInjectable
 	{

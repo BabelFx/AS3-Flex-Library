@@ -22,6 +22,7 @@ The BabelFx solution can be used:
 - Within AIR deployments or Web-only solutions. 
 - Within modules or applications.
 
+---  
 
 ### Change History
 
@@ -33,6 +34,8 @@ Version 2.0 - Repackaging and code cleanup
   1. SmartResourceInjector.as -> ResourceInjector.as
   2. ResourceProxy.as -> ResourceSetter.as
   3. PropertyProxy.as -> PropertySetter.as
+
+---  
 
 
 This GIT repository contains the both: 

@@ -17,18 +17,12 @@ Author: Thomas Burleson, Principal Architect
                 
 @ignore
 */
-package com.mindspace.l10n.maps
+package org.babelfx.maps
 {
 	import com.asfusion.mate.core.GlobalDispatcher;
 	import com.asfusion.mate.core.ListenerProxy;
 	import com.asfusion.mate.events.InjectorEvent;
 	import com.codecatalyst.factory.ClassFactory;
-	import com.mindspace.l10n.commands.ILocaleCommand;
-	import com.mindspace.l10n.commands.LocaleCommand;
-	import com.mindspace.l10n.events.*;
-	import com.mindspace.l10n.injectors.ResourceInjector;
-	import com.mindspace.l10n.utils.InjectorUtils;
-	import com.mindspace.l10n.utils.debug.LocaleLogger;
 	
 	import flash.display.DisplayObject;
 	import flash.events.Event;
@@ -43,10 +37,17 @@ package com.mindspace.l10n.maps
 	import mx.logging.ILoggingTarget;
 	import mx.logging.LogEventLevel;
 	import mx.logging.targets.TraceTarget;
+	
+	import org.babelfx.commands.LocaleCommand;
+	import org.babelfx.events.*;
+	import org.babelfx.injectors.AbstractInjector;
+	import org.babelfx.interfaces.ILocaleCommand;
+	import org.babelfx.utils.InjectorUtils;
+	import org.babelfx.utils.debug.LocaleLogger;
 
-	[Event(name='localeChanging',type='com.mindspace.l10n.events.LocaleMapEvent')]
-	[Event(name='targetReady',	 type='com.mindspace.l10n.events.LocaleMapEvent')]
-	[Event(name='initialized',   type='com.mindspace.l10n.events.LocaleMapEvent')]
+	[Event(name='localeChanging',type='org.babelfx.events.LocaleMapEvent')]
+	[Event(name='targetReady',	 type='org.babelfx.events.LocaleMapEvent')]
+	[Event(name='initialized',   type='org.babelfx.events.LocaleMapEvent')]
 	
 	[DefaultProperty("injectors")]
 	
@@ -104,14 +105,14 @@ package com.mindspace.l10n.maps
 		 * 
 		 * @code
 		 * 
-		 *    <l10n:LocaleMap>
-		 * 		<l10n:commandFactory>
-		 * 				<mx:ClassFactory generator="{MyLocaleLoader}" properties="{loaderConfig}" />
-		 *      </l10n:commandFactory>
-		 * 		<l10n:loggingTarget>
-		 * 				<l10n:ClassFactory generator="{mx.logging.targets.TraceTarget}" properties="{{level:LogEventType.WARN + LogEventType.ERROR}}"
-		 * 		</l10n:logginTargets>
-		 * 	  </l0n:LocaleMap>
+		 *    &lt;l10n:LocaleMap&gt;
+		 * 		&lt;l10n:commandFactory&gt;
+		 * 				&lt;mx:ClassFactory generator="{MyLocaleLoader}" properties="{loaderConfig}" /&gt;
+		 *      &lt;/l10n:commandFactory&gt;
+		 * 		&lt;l10n:loggingTarget&gt;
+		 * 				&lt;l10n:ClassFactory generator="{mx.logging.targets.TraceTarget}" properties="{{level:LogEventType.WARN + LogEventType.ERROR}}"
+		 * 		&lt;/l10n:logginTargets&gt;
+		 * 	  &lt;/l0n:LocaleMap&gt;
 		 *  
 		 * @param val Class with interface ILocaleCommand or a IFactory instance...
 		 * 
@@ -132,7 +133,7 @@ package com.mindspace.l10n.maps
 		}
 		
 		/**
-		 * An array of classes that, when an object is created, should trigger the <code>InjectorHandlers</code> to run. 
+		 * An array of classes that, when an object is created, should trigger the InjectorHandlers to run. 
 		 * 
 		 *  @default true
 		 * */
@@ -232,14 +233,14 @@ package com.mindspace.l10n.maps
 
 		public function addInjectors(injectors:Array):void {
 			if (this.injectors != injectors) {
-				for each (var oit:ResourceInjector in injectors) {
+				for each (var oit:AbstractInjector in injectors) {
 					if (oit == null) continue;
 					oit.release();
 				}
 				
 				this.injectors = injectors;
 				
-				for each (var nit:ResourceInjector in injectors) {
+				for each (var nit:AbstractInjector in injectors) {
 					nit.initialized(this,"");
 				}
 				invalidateProperties();
@@ -553,7 +554,7 @@ package com.mindspace.l10n.maps
 	
 		private var _isInitialized				:Boolean = false;
 		
-		private var _dispatcher 				:GlobalDispatcher 	= new GlobalDispatcher();
+		private var _dispatcher 				:IEventDispatcher 	= new GlobalDispatcher();
 		private var _listenerProxies			:Dictionary 		= new Dictionary(true);
 
 		private var _localeCommand              :ILocaleCommand = null;

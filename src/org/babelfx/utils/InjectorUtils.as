@@ -17,7 +17,7 @@ Author: Thomas Burleson, Principal Architect
                 
 @ignore
 */
-package com.mindspace.l10n.utils
+package org.babelfx.utils
 {
 	import flash.utils.Dictionary;
 	import flash.utils.getDefinitionByName;

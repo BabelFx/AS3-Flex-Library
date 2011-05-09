@@ -22,6 +22,19 @@ The BabelFx solution can be used:
 - Within AIR deployments or Web-only solutions. 
 - Within modules or applications.
 
+
+### Change History
+
+Version 2.0 - Repackaging and code cleanup
+
+1. Changed namespace from to "library://ns.babelfx.org/l10n/flex/ " "http://l10n.babelfx.org/"
+2. Modified package structures from "com.mindspace.l10n.*" to org.babelfx.*
+3. Changed classnames
+  1. SmartResourceInjector.as -> ResourceInjector.as
+  2. ResourceProxy.as -> ResourceSetter.as
+  3. PropertyProxy.as -> PropertySetter.as
+
+
 This GIT repository contains the both: 
 
 1. the source code for the BabelFX.swc flex library, and 
@@ -32,7 +45,7 @@ Please review the [tutorials and blogs](http://www.gridlinked.info) and [code sa
 
 ### Library Build Tips
 
-    Namespace URL:   library://ns.babelfx.org/l10n/flex/
+    Namespace URL:   http://l10n.babelfx.org/
     Manifest file:  manifest.xml
 
 ### Open-Source License

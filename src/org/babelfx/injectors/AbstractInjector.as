@@ -17,15 +17,8 @@ thomas burleson at g mail dot com
 
 @ignore
 */
-package com.mindspace.l10n.injectors
+package org.babelfx.injectors
 {
-	import com.mindspace.l10n.events.LocaleMapEvent;
-	import com.mindspace.l10n.maps.LocaleMap;
-	import com.mindspace.l10n.proxys.ResourceMap;
-	import com.mindspace.l10n.proxys.ResourceProxy;
-	import com.mindspace.l10n.utils.InjectorUtils;
-	import com.mindspace.l10n.utils.debug.LocaleLogger;
-	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
@@ -44,16 +37,22 @@ package com.mindspace.l10n.injectors
 	import mx.styles.IStyleClient;
 	import mx.utils.StringUtil;
 	
+	import org.babelfx.events.LocaleMapEvent;
+	import org.babelfx.maps.LocaleMap;
+	import org.babelfx.proxys.ResourceSetter;
+	import org.babelfx.utils.InjectorUtils;
+	import org.babelfx.utils.debug.LocaleLogger;
+	
 	/**
 	 * Sample MXML Usage.
 	 * @code
 	 * 
-	 *  <ResourceInjector id="rbProxy" bundle="registration">
-	 *	 	<mx:Array>
-	 *          <ResourceProxy 	target="" property="" key="" bundle="" parameters=""  />
-	 *	 		<mx:Object 		target="" property="" key="" bundle="" />
-	 *	 	</mx:Array>
-	 *	 </ResourceInjector>
+	 *  &lt;ResourceInjector id="rbProxy" bundle="registration"&gt;
+	 *	 	&lt;mx:Array&gt;
+	 *          &lt;ResourceSetter 	target="" property="" key="" bundle="" parameters=""  /&gt;
+	 *	 		&lt;mx:Object 		target="" property="" key="" bundle="" /&gt;
+	 *	 	&lt;/mx:Array&gt;
+	 *	 &lt;/ResourceInjector&gt;
 	 *  
 	 * @author thomasburleson
 	 * 
@@ -62,7 +61,9 @@ package com.mindspace.l10n.injectors
 	[Event(name="change",type="flash.events.Event")]
 	[Event(name="localeChange", type="flash.events.Event")]
 	
-	public class ResourceInjector extends EventDispatcher implements IMXMLObject {
+	[ExcludeClass]
+	
+	public class AbstractInjector extends EventDispatcher implements IMXMLObject {
 		
 		public var log		   : ILogger= LocaleLogger.getLogger(this);
 		
@@ -94,7 +95,7 @@ package com.mindspace.l10n.injectors
 		 * @param bundleName
 		 * 
 		 */
-		public function ResourceInjector( bundleName:String="", localeManager:IResourceManager=null)  
+		public function AbstractInjector( bundleName:String="", localeManager:IResourceManager=null)  
 		{  
 			this.bundleName      = bundleName;
 			
@@ -165,7 +166,7 @@ package com.mindspace.l10n.injectors
 					// release all items by reference to target instance...
 					// scan all items in registry
 					for (var key:String in _registry) {
-						var it : ResourceMap = _registry[key] as ResourceMap;
+						var it : org.babelfx.proxys.ResourceSetter = _registry[key] as org.babelfx.proxys.ResourceSetter;
 						
 						if (!it && (it.target == target)) {
 							// remove release of change listener
@@ -179,8 +180,8 @@ package com.mindspace.l10n.injectors
 							delete _registry[key];
 						} 
 					}
-				} else if (target is ResourceMap) {
-					self::removeItem(target as ResourceMap);
+				} else if (target is org.babelfx.proxys.ResourceSetter) {
+					self::removeItem(target as org.babelfx.proxys.ResourceSetter);
 				}
 			}
 			else if (target == null) {
@@ -198,10 +199,10 @@ package com.mindspace.l10n.injectors
 		 * @return ResourceMap that was added to the registry
 		 * 
 		 */
-		private function addItem(src:Object):ResourceMap {
+		private function addItem(src:Object):org.babelfx.proxys.ResourceSetter {
 			if (src == null) return null;
 			
-			var results     :ResourceMap= null;
+			var results     :org.babelfx.proxys.ResourceSetter= null;
 			
 			var target		:Object 	= keyValue("target",null);
 			var state       :String     = keyValue("state","");
@@ -216,7 +217,7 @@ package com.mindspace.l10n.injectors
 				if (_registry[key] == undefined) {
 					if (bundle == "") bundle = this.bundleName;
 					
-					results = new ResourceMap(target,key,property,state,type,parameters,bundle);
+					results = new org.babelfx.proxys.ResourceSetter(target,key,property,state,type,parameters,bundle);
 					_registry[key] = results;
 				}
 				assignResourceValues();
@@ -234,19 +235,19 @@ package com.mindspace.l10n.injectors
 		}
 		
 		/**
-		 * Internal Method override to add ResourceProxy items to registry
+		 * Internal Method override to add ResourceSetter items to registry
 		 *  
-		 * @param map ResourceProxy instance
-		 * @return Reference to ResourceProxy instance.
+		 * @param map ResourceSetter instance
+		 * @return Reference to ResourceSetter instance.
 		 * 
 		 */
-		self function addItem(map:ResourceMap):ResourceMap {
+		self function addItem(map:org.babelfx.proxys.ResourceSetter):org.babelfx.proxys.ResourceSetter {
 			if (map != null) {
 				
 				if (findItemByMap(map) == null) {
 					
 					if (map.bundleName == "") map.bundleName = this.bundleName;
-					if (map is ResourceProxy) ResourceProxy(map).addEventListener(PropertyChangeEvent.PROPERTY_CHANGE,onRegistrationChanges,false,0,true);
+					if (map is ResourceSetter) IEventDispatcher(map).addEventListener(PropertyChangeEvent.PROPERTY_CHANGE,onRegistrationChanges,false,0,true);
 					
 					if (map.key != "") _registry[map.key] = map;
 				}
@@ -257,9 +258,9 @@ package com.mindspace.l10n.injectors
 			return map; 
 		}
 		
-		self function removeItem(map:ResourceMap):void {
+		self function removeItem(map:org.babelfx.proxys.ResourceSetter):void {
 			if (map != null ) {
-				if (map is ResourceProxy) ResourceProxy(map).removeEventListener(PropertyChangeEvent.PROPERTY_CHANGE,onRegistrationChanges);
+				if (map is ResourceSetter) IEventDispatcher(map).removeEventListener(PropertyChangeEvent.PROPERTY_CHANGE,onRegistrationChanges);
 				if (findItemByMap(map) == true) delete _registry[map.key];
 			}
 		}
@@ -323,7 +324,7 @@ package com.mindspace.l10n.injectors
 		 * @param event
 		 */
 		protected function onRegistrationChanges(event:PropertyChangeEvent):void {
-			var rProxy : ResourceProxy = event.target as ResourceProxy;
+			var rProxy : ResourceSetter = event.target as ResourceSetter;
 			
 			self::addItem(rProxy);
 			dispatchEvent(new Event(Event.CHANGE));
@@ -365,7 +366,7 @@ package com.mindspace.l10n.injectors
 			for (var j:int=0; j<items.length; j++) {
 				var it:Object = items[j];
 				
-				if (it is ResourceMap) 	 self::addItem(it as ResourceMap);		// Add typed item
+				if (it is org.babelfx.proxys.ResourceSetter) 	 self::addItem(it as org.babelfx.proxys.ResourceSetter);		// Add typed item
 				else                     addItem(it);							// Add generic object
 			}
 			
@@ -384,7 +385,7 @@ package com.mindspace.l10n.injectors
 			var announceChanges : Boolean = false;
 			
 			for (var key:Object in _registry) {
-				var map : ResourceMap = (_registry[key] as ResourceMap);
+				var map : org.babelfx.proxys.ResourceSetter = (_registry[key] as org.babelfx.proxys.ResourceSetter);
 				if ((map.state == viewState) || (viewState == "")) {
 					assignResourceValuesTo(map);
 					announceChanges = true;
@@ -407,7 +408,7 @@ package com.mindspace.l10n.injectors
 		 * @param ui
 		 * 
 		 */
-		protected function assignResourceValuesTo(map:ResourceMap):void {
+		protected function assignResourceValuesTo(map:org.babelfx.proxys.ResourceSetter):void {
 			if (!map || !map.target || (map.target is Class)) return;
 			
 			var target:Object = map.target;
@@ -474,14 +475,14 @@ package com.mindspace.l10n.injectors
 		 * @return Target object used as key for the specified ResourceMap
 		 * 
 		 */
-		private function findItemByMap(map:ResourceMap):Object {
+		private function findItemByMap(map:org.babelfx.proxys.ResourceSetter):Object {
 			var results : Object = null;
 			
 			for (var key:Object in _registry) {
 				if (_registry[key] == map) {
 					
 					if (key != map.key) {
-						// The target changed (see ResourceProxy); so clear registry
+						// The target changed (see ResourceSetter); so clear registry
 						delete _registry[key];
 						key = null;
 					}
@@ -512,11 +513,11 @@ package com.mindspace.l10n.injectors
 			return results; 	  
 		}
 		
-		private function isValidTargetState(map:ResourceMap):Boolean {
+		private function isValidTargetState(map:org.babelfx.proxys.ResourceSetter):Boolean {
 			var results 	 : Boolean = true;
 			var desiredState: String  = map.state;
 			
-			function listenStateChanges(map:ResourceMap):UIComponent {
+			function listenStateChanges(map:org.babelfx.proxys.ResourceSetter):UIComponent {
 				// If trigger is NOT specified, use parent of target
 				var ui  : UIComponent  = (map.trigger ? map.trigger : scanForTrigger(map.target)) as UIComponent;
 				if (ui != null) {
@@ -562,7 +563,7 @@ package com.mindspace.l10n.injectors
 		 * @return Object 	Reference to object instance whose property will be modified.
 		 * 
 		 */
-		private function resolveEndPoint(map:ResourceMap):Object {	   	 
+		private function resolveEndPoint(map:org.babelfx.proxys.ResourceSetter):Object {	   	 
 			var results : Object = null;
 			
 			try {
@@ -582,11 +583,11 @@ package com.mindspace.l10n.injectors
 		 * @return String 	Property key in the "endPoint" target
 		 * 
 		 */
-		private function resolveProperty(map:ResourceMap):String {
+		private function resolveProperty(map:org.babelfx.proxys.ResourceSetter):String {
 			return InjectorUtils.resolveProperty(map.property);
 		}
 		
-		private function logError(map:ResourceMap,errorType:String,node:String=null ):void {
+		private function logError(map:org.babelfx.proxys.ResourceSetter,errorType:String,node:String=null ):void {
 			var targetID : String = getTargetIdentifier(map.target);
 			var details  : String = "";
 			switch(errorType) {

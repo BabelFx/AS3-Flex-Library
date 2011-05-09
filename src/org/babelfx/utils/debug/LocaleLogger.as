@@ -1,4 +1,4 @@
-package com.mindspace.l10n.utils.debug
+package org.babelfx.utils.debug
 {
 	import flash.events.EventDispatcher;
 	import flash.utils.Dictionary;
@@ -11,9 +11,9 @@ package com.mindspace.l10n.utils.debug
 	
 	public class LocaleLogger extends EventDispatcher implements ILogger
 	{
-		public static var defaultFilters : Array = [ 	"com.mindspace.l10n.maps.*",
-														"com.mindspace.l10n.commands.*",
-														"com.mindspace.l10n.injectors.*"
+		public static var defaultFilters : Array = [ 	"org.babelfx.maps.*",
+														"org.babelfx.commands.*",
+														"org.babelfx.injectors.*"
 												];
 		/**
 		 * 

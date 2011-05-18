@@ -129,22 +129,19 @@ package org.babelfx.maps
 	     *  @productversion Flex 3
 		 */
 		public function get enableLog():Boolean {
-			return _debugEnabled;
+			return _logCommands;
 		}
 		/**
 		 *  @private
 		 */
 		public function set enableLog(val:Boolean):void {
-			_debugEnabled = val;
+			LocaleLogger.addToFilters(this);
 			
-			if (val == true) {
-				// Attach existing or new customized _logger
-				this.loggingTarget = _logTarget ? _logTarget : new ClassFactory(TraceTarget,null,_defaultProperties);		
-				
-			} else if (!val && (_logTarget !=null)) {
-				// Disable any logging for now...
-				LocaleLogger.removeLoggingTarget(_logTarget);
-			}
+			// Use existing or default if active...
+			this.loggingTarget = val ? LocaleLogger.sharedTarget || TraceTarget : null;
+
+			_logger 	 = LocaleLogger.getLogger(this);
+			_logCommands = val;
 		}
 		
 		
@@ -172,19 +169,15 @@ package org.babelfx.maps
 		 * @langversion 3.0
 		 */
 		public function set loggingTarget(val : *):void {
-			if (val == null) return;	// Clear existing target not supported
-			
-			if ((_logTarget != null) && val) LocaleLogger.removeLoggingTarget(_logTarget);
-			
-			
-			_logTarget = (val is ILoggingTarget) ? 	ILoggingTarget(val) 						  :
-						 (val is IFactory)		 ?	IFactory(val).newInstance() as ILoggingTarget : 
-						 (val is Class)          ?  new ClassFactory(val,null,_defaultProperties).newInstance() : 
-						 (val is String)         ?  new ClassFactory(val,null,_defaultProperties).newInstance() : null;
-			
-			if (_logTarget != null) {
-				_debugEnabled = true;
-				LocaleLogger.addToFilters(this);
+			if (val != _logTarget) {
+				
+				LocaleLogger.removeLoggingTarget(_logTarget);
+				
+				_logTarget = (val is ILoggingTarget) ? 	ILoggingTarget(val) 						  :
+							 (val is IFactory)		 ?	IFactory(val).newInstance() as ILoggingTarget : 
+							 (val is Class)          ?  new ClassFactory(val,null,_defaultProperties).newInstance() : 
+							 (val is String)         ?  new ClassFactory(val,null,_defaultProperties).newInstance() : null;
+				
 				LocaleLogger.addLoggingTarget(_logTarget);
 			}
 		}
@@ -226,10 +219,11 @@ package org.babelfx.maps
 			if (val is IFactory)     _commandFactory = val as IFactory;
 			else if (val is Class)	 _commandFactory = new ClassFactory(val as Class);
 			else {
+				_logger.error(ERROR_INVALID_FACTORY);
+				
 				// Use internal default locale switcher command 
 				// LocaleCommand does not load external bundles, instead it simply switches embedded locales
 				_commandFactory = new ClassFactory(LocaleCommand);
-				_logger.error(ERROR_INVALID_FACTORY);
 			}
 			
 			_isCustomFactory = true;
@@ -404,9 +398,9 @@ package org.babelfx.maps
 			commitProperties();
 			
 			dispatchEvent(new LocaleMapEvent(LocaleMapEvent.INITIALIZED, document));
-			
 			// Add listener to register non-UIComponents for injection...
 			this.addEventListener(LocaleMapEvent.REGISTER_TARGET, onSpriteAddedToStage);
+
 			_logger.debug("addEventListener for externally dispatched '{0}' ", LocaleMapEvent.REGISTER_TARGET);
 			
 		}
@@ -447,8 +441,12 @@ package org.babelfx.maps
 			var currentType:String = ( target is Class) ? getQualifiedClassName( target ) : (target as String);
 			
 			if (currentType && currentType != "") {
-				_dispatcher.addEventListener( currentType, onCreationComplete_Target, false, 0, true);
-				_logger.debug("registerTargetClass({0})",currentType);
+				var alreadyRegistered : Boolean = _dispatcher.hasEventListener(currentType);
+				
+				if ( !alreadyRegistered ) {
+					_logger.debug("registerTargetClass({0})",currentType);
+					_dispatcher.addEventListener( currentType, onCreationComplete_Target, false, 0, true);
+				}
 			}
 		}
 		
@@ -562,14 +560,16 @@ package org.babelfx.maps
 		 */		
 		protected function onSpriteAddedToStage(event:Event):void {
 			var target:Object = (event is LocaleMapEvent) ? LocaleMapEvent(event).targetInst : event.target;
-			_logger.debug("onSpriteAddedToStage() for '{0}'", getQualifiedClassName(target));
 			
-			if (target && !(target is IUIComponent)) announceTargetReady(target);
+			if (target && !(target is IUIComponent)) {
+				_logger.debug("onSpriteAddedToStage() for '{0}'", getQualifiedClassName(target));
+				announceTargetReady(target);
+			}
 		}
 		
 		protected function onLoadLocale(event:LocaleEvent):void {
 			// Make sure the _logger is configured...
-			configureLogging(_debugEnabled);
+			configureLogging(_logCommands);
 			_logger.debug("onLoadLocale() request for {0}",event.action);
 			
 			if (event.action == LocaleEvent.LOAD_LOCALE) {
@@ -584,6 +584,11 @@ package org.babelfx.maps
 				if (_localeCommand != null) _localeCommand.execute(event);
 				else  			 			_logger.error(ERROR_INVALID_COMMAND_INSTANCE);
 			}
+			
+			// If multiple localeMaps are instantiated, only the FIRST map to get the event should process
+			// the loadLocale request. Kill propagation to the other possible map instances
+			
+			event.stopImmediatePropagation();
 		}
 		
 		/**
@@ -592,10 +597,11 @@ package org.babelfx.maps
 		*/
 		protected function onCreationComplete_Target(event:Event, logIt:Boolean=true):void {
 			var instance 	: Object = kevValueFrom(event,"injectorTarget") as Object;
+			var clazzName   : String = getQualifiedClassName(instance); 
 			var uid			: *      = kevValueFrom(event,"uid");
 			
 			if (logIt == true) {
-				_logger.debug("onCreationComplete_Target() for '{0}'", uid || getQualifiedClassName(instance));	
+				_logger.debug("onCreationComplete_Target() for '{0}'", uid || clazzName);	
 			}
 			announceTargetReady(instance);
 		}
@@ -642,8 +648,8 @@ package org.babelfx.maps
 		}
 		
 		private var _logger						:ILogger        = LocaleLogger.getLogger(this);
-		private var _logTarget                  :ILoggingTarget = null;
-		private var _debugEnabled				:Boolean 		= false;
+		private var _logTarget                  :ILoggingTarget = LocaleLogger.sharedTarget;
+		private var _logCommands				:Boolean 		= false;
 		
 		// ************************************************************************************************
 		//  Private Attributes

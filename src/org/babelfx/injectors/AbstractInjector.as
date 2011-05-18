@@ -19,8 +19,6 @@ thomas burleson at g mail dot com
 */
 package org.babelfx.injectors
 {
-	import org.babelfx.proxys.ResourceSetter;
-	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
@@ -359,6 +357,8 @@ package org.babelfx.injectors
 		 * 
 		 */
 		protected function buildRegistry(target:Object):void {
+			//log.debug("buildRegistry()");
+			
 			var items : Array = [];
 			
 			if (target is Array) 				items = target as Array;
@@ -368,8 +368,8 @@ package org.babelfx.injectors
 			for (var j:int=0; j<items.length; j++) {
 				var it:Object = items[j];
 				
-				if (it is ResourceSetter) 	 self::addItem(it as ResourceSetter);		// Add typed item
-				else                     addItem(it);							// Add generic object
+				if (it is ResourceSetter) 	self::addItem(it as ResourceSetter);		// Add typed item
+				else                     	addItem(it);							// Add generic object
 			}
 			
 			_initialized = true;

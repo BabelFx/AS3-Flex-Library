@@ -72,6 +72,11 @@ package org.babelfx.utils.debug
 		}
 		
 		
+		public static function get sharedTarget():ILoggingTarget {
+			loggingTargets ||= [];
+			return loggingTargets.length ? loggingTargets[0] as ILoggingTarget : null;
+		}
+
 		/**
 		 * 
 		 * @param it
@@ -270,7 +275,6 @@ package org.babelfx.utils.debug
 
 		protected static var loggers		:Dictionary = new Dictionary();
 		protected static var loggingTargets	:Array		= [];
-		
 		
 		private static function smartAddFilter(src:String,filters:Array):Array {
 			var results : Array   = [];

@@ -33,7 +33,7 @@ Version 2.0 - Repackaging and code cleanup
   1. SmartResourceInjector.as -> ResourceInjector.as
   2. ResourceProxy.as -> ResourceSetter.as
   3. PropertyProxy.as -> PropertySetter.as
-
+4. Fixes to support LocaleMaps in Modules; also fixed support of multiple LocaleMaps in a single application
 
 This GIT repository contains the both: 
 

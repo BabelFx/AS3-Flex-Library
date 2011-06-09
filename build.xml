@@ -2,11 +2,13 @@
 <!-- This build file provdes a close approximation of the build process 
      and build settings inside Flash Builder, but it is not an exact copy.  
      Please customize this file as necessary. -->
-<!-- Generated from project settings as of 5/8/11 9:23 PM -->
-<project name="Framework_BabelFx" default="build" basedir="/Users/thomasburleson/Documents/dev/frameworks/BabelFx/l10n_Library">
+<!-- Generated from project settings as of 6/9/11 11:24 AM -->
+<project name="Framework_BabelFx" default="build" basedir="./">
 
-	<property name="FLEX_HOME" value="/Developer/Applications/Adobe\ Flash\ Builder\ 4.5/sdks/4.5.0"/>
-	<property name="SDK_VERSION" value="4.5.0.0"/>
+	<property file="${basedir}/build/build.properties" />
+	
+	<property name="FLEX_HOME" value="/Developer/Applications/Adobe Flash Builder 4.5/sdks/4.5.1"/>
+	<property name="SDK_VERSION" value="4.5.1.21309"/>
 
 	<taskdef name="mxmlc" classname="flex.ant.MxmlcTask" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar"/>
 	<taskdef name="compc" classname="flex.ant.CompcTask" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar"/>
@@ -18,12 +20,17 @@
 	<property name="OUTPUT_DIR" value="${PROJECT_DIR}/bin"/>
 	<property name="LOCALE" value="en_US"/>
 
-	<target name="build">
+	<target name="buildWithDocs">
 		<antcall target="clean"/>
 		<antcall target="compile"/>
 		<antcall target="asdoc"/>
 	</target>
 
+	<target name="build">
+		<antcall target="clean"/>
+		<antcall target="compile"/>
+	</target>
+	
 	<target name="clean">
 		<delete includeemptydirs="true">
 			<fileset dir="${OUTPUT_DIR}" includes="**/*"/>
@@ -32,20 +39,29 @@
 
 	<target name="compile">
 		<compc 
-			output="${OUTPUT_DIR}/babelFx.swc"
-			include-classes="com.asfusion.mate.core.Binder com.asfusion.mate.core.GlobalDispatcher com.asfusion.mate.core.ListenerProxy com.asfusion.mate.events.InjectorEvent com.asfusion.mate.events.InjectorSettingsEvent com.asfusion.mate.utils.SystemManagerFinder com.asfusion.mate.utils.binding.SoftChangeWatcher com.asfusion.mate.utils.debug.LogInfo com.asfusion.mate.utils.debug.LogTypes com.codecatalyst.factory.ClassFactory com.codecatalyst.util.ClassUtil com.codecatalyst.util.EventDispatcherUtil com.codecatalyst.util.PropertyUtil com.mindspace.l10n.commands.ExternalLocaleCommand com.mindspace.l10n.commands.ILocaleCommand com.mindspace.l10n.commands.LocaleCommand com.mindspace.l10n.events.LocaleEvent com.mindspace.l10n.events.LocaleMapEvent com.mindspace.l10n.injectors.ResourceInjector com.mindspace.l10n.injectors.SmartResourceInjector com.mindspace.l10n.maps.AbstractMap com.mindspace.l10n.maps.LocaleMap com.mindspace.l10n.proxys.ITargetInjectable com.mindspace.l10n.proxys.PropertyProxy com.mindspace.l10n.proxys.ResourceMap com.mindspace.l10n.proxys.ResourceProxy com.mindspace.l10n.utils.InjectorUtils com.mindspace.l10n.utils.debug.LocaleLogger"
+			output="${OUTPUT_DIR}/${lib.name}.swc"
+			debug="false"
+			include-classes="com.asfusion.mate.core.Binder com.asfusion.mate.core.GlobalDispatcher com.asfusion.mate.core.ListenerProxy com.asfusion.mate.events.InjectorEvent com.asfusion.mate.events.InjectorSettingsEvent com.asfusion.mate.utils.SystemManagerFinder com.asfusion.mate.utils.binding.SoftChangeWatcher com.asfusion.mate.utils.debug.LogInfo com.asfusion.mate.utils.debug.LogTypes com.codecatalyst.factory.ClassFactory com.codecatalyst.util.ClassUtil com.codecatalyst.util.EventDispatcherUtil com.codecatalyst.util.PropertyUtil org.babelfx.commands.ExternalLocaleCommand org.babelfx.interfaces.ILocaleCommand org.babelfx.commands.LocaleCommand org.babelfx.events.LocaleEvent org.babelfx.events.LocaleMapEvent org.babelfx.injectors.AbstractInjector org.babelfx.injectors.ResourceInjector org.babelfx.maps.AbstractMap org.babelfx.maps.LocaleMap org.babelfx.interfaces.ITargetInjectable org.babelfx.proxys.PropertySetter org.babelfx.proxys.ResourceSetter org.babelfx.utils.InjectorUtils org.babelfx.utils.debug.LocaleLogger"
 		>
-			<source-path path-element="${SOURCE_DIR}"/>
-			<library-path file="${FLEX_HOME}/frameworks/libs/authoringsupport.swc" append="true"/>
+			<namespace uri="${lib.namespace}" manifest="${src.loc}/manifest.xml" />
+			<include-namespaces uri="${lib.namespace}" />
+
+			  	<source-path path-element="${SOURCE_DIR}"/>
 			<library-path file="${FLEX_HOME}/frameworks/libs/flash-integration.swc" append="true"/>
 			<library-path file="${FLEX_HOME}/frameworks/locale/${LOCALE}" append="true"/>
 
-			<external-library-path file="${FLEX_HOME}/frameworks/libs/player/10.2/playerglobal.swc" append="true"/>
-			<library-path file="${FLEX_HOME}/frameworks/libs/authoringsupport.swc" append="true"/>
+			 <!-- Configure the flex framework libraries as external link dependencies -->
+  			<external-library-path dir="${FLEX_HOME}/frameworks" append="true">
+  				<include name="libs" />
+  				<include name="locale/{locale}" />  				
+  			</external-library-path>
+			
 			<library-path file="${FLEX_HOME}/frameworks/libs/flash-integration.swc" append="true"/>
 
 			<library-path dir="${FLEX_HOME}/frameworks/locale/${LOCALE}" includes="*" append="true"/>
-
+			
+			<!-- Sets java.awt.headless=true so font compilation works in headless environments -->
+			<headless-server>true</headless-server>
 		</compc>
 	</target>
 

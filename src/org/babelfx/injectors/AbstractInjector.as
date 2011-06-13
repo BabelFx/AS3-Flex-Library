@@ -452,7 +452,11 @@ package org.babelfx.injectors
 				  
 				  if (ui.hasOwnProperty(property) == true) 	{
 					  // The target property could be a function...
-					  var accessor : Function = ui[property] as Function;
+					  try {
+					  	var accessor : Function = ui[property] as Function;
+					  } catch (e:Error) { 
+						  // do nothing...
+					  }
 					  
 					  if (accessor != null)  accessor.apply(ui,[val]);
 					  else					 ui[property] = val;

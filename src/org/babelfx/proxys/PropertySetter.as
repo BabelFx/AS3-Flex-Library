@@ -83,9 +83,10 @@ package org.babelfx.proxys 
 		
 		
 		/**
-		 * The name of the property that the injector will set in the target object
+		 * The instance name that must match for the target ID before the localized
+		 * content will be injected into the instance property.
 		 * 
-		 * @default null
+		 * @default ""
 		 * */
 		public  var targetID:String = "";
 

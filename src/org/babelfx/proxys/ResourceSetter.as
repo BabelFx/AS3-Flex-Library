@@ -30,6 +30,7 @@ package org.babelfx.proxys
 	[Event(name='propertyChange',type='mx.events.PropertyChangeEvent')]
 	
 	
+	[Event(name="propertyChange",type="flash.events.Event")]
 	/**
 	 * The ResourcSetter establishes a mapping between a single entry of bundled, localized content and a property(chain) of a single
 	 * target instance. This class does not perform the injection nor validate the propertyChain. Rather, this class establishes the 
@@ -67,8 +68,17 @@ package org.babelfx.proxys
 		 * dynamically resolved for each instance and for each injection. 
 		 */
 		public var property    	: String = "";
+
 		
+
+		/**
+		 * Unique identifier for instance of target class. Only instances with this ID 
+		 * will bre cached and participate in locdaleinjections with locale changes 
+		 */
+		public var targetID : String = "";
 		
+
+		[Bindable(event="propertyChange")]
 		/**
 		 * Array of values that will be used to build injectable content. Needed with 
 		 * the resource has parameterized tokens that will be substituted dynamcially before each injection.
@@ -84,16 +94,20 @@ package org.babelfx.proxys
 		 * 									key="userMenu.currentUser.signedInAs" 	
 		 * 									parameters="{[Model.instance.profile.fullName]}" /&gt;
 		 * 
- 		 */
-		public var parameters 	: Array;
-		
-
-		/**
-		 * Unique identifier for instance of target class. Only instances with this ID 
-		 * will bre cached and participate in locdaleinjections with locale changes 
 		 */
-		public var targetID : String = "";
-		
+		public function get parameters():Array {
+			return _parameters;
+		}
+		public function set parameters(value:Array):void {
+			if (_parameters != value)
+			{
+				var prevParams : Array = _parameters;
+				_parameters = value;
+				
+				IEventDispatcher(this).dispatchEvent( PropertyChangeEvent.createUpdateEvent(this,"parameters",prevParams,_parameters) );
+			}
+		}
+
 		[Bindable("propertyChange")]
 		/**
 		 * Reference to the current target instance that has been assigned or temporarily JUST injected.
@@ -172,5 +186,11 @@ package org.babelfx.proxys
 		 * @private
 		 */
 		private var _target     : Object = null; 		// destination object that receive injection into property
-	}
+
+		
+		
+		/**
+		 * @private 
+		 */		
+		private var _parameters 	: Array;	}
 }

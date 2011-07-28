@@ -116,14 +116,14 @@ package com.asfusion.mate.core
 		
 		public static function bindProperty( site:Object, prop:String,  host:Object, chain:Object, commitOnly:Boolean = false):SoftChangeWatcher
 		{
+					function assign(event:*):void {
+						site[prop] = w.getValue();
+					}
+					
 	        var w:SoftChangeWatcher =  SoftChangeWatcher.watch(host, chain, null, commitOnly);
-	        
+					
 	        if (w != null)
 	        {
-	            var assign:Function = function(event:*):void
-	            {
-	                site[prop] = w.getValue();
-	            };
 	            w.setHandler(assign);
 	            assign(null);
 	            

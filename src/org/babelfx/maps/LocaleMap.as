@@ -441,12 +441,8 @@ package org.babelfx.maps
 			var currentType:String = ( target is Class) ? getQualifiedClassName( target ) : (target as String);
 			
 			if (currentType && currentType != "") {
-				var alreadyRegistered : Boolean = _dispatcher.hasEventListener(currentType);
-				
-				if ( !alreadyRegistered ) {
-					_logger.debug("registerTargetClass({0})",currentType);
-					_dispatcher.addEventListener( currentType, onCreationComplete_Target, false, 0, true);
-				}
+				_logger.debug("registerTargetClass({0})",currentType);
+				_dispatcher.addEventListener( currentType, onCreationComplete_Target, false, 0, true);
 			}
 		}
 		

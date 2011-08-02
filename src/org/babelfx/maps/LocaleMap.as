@@ -57,6 +57,20 @@ package org.babelfx.maps
 	[Event(name='localeChanging',type='org.babelfx.events.LocaleMapEvent')]
 
 	/**
+	 *  Dispatched after the current locale has changed, but BEFORE the ResourceInjectors are triggered. 
+	 *  This event is dispatched whenever the ResourceManager::localeChain is modified (by BabelFx or other means).
+	 * 
+	 *  @eventType org.babelfx.events.LocaleMapEvent.LOCALE_CHANGED
+	 *  
+	 *  @langversion 3.0
+	 *  @playerversion Flash 9
+	 *  @playerversion AIR 1.1
+	 *  @productversion Flex 3
+	 */
+	[Event(name='localeChanged',type='org.babelfx.events.LocaleMapEvent')]
+	
+
+	/**
 	 *  Dispatched when a new instance of a <code>ResourceInjector::target</code> is 
 	 *  ready for injection. All children <code>ResourceInjector</code>s listen
 	 *  for <code>LocaleMapEvent.TARGET_READY</code> events from the <code>LocaleMap</code> instance.
@@ -622,10 +636,24 @@ package org.babelfx.maps
 			}
 		}
 		
+		/**
+		 * Announce to LocalizationMap listeners that the resourceManager localeChain has changed
+		 * but the ResourceInjectors have NOT yet been triggered.
+		 * 
+		 * @param Event Event.CHANGE
+		 */
+		override protected function onLocaleChange(event:Event):void {
+			dispatchEvent( new LocaleMapEvent(LocaleMapEvent.LOCALE_CHANGED) );
+		}
+
+		
+		// ************************************************************************************************
+		//  Private Utility Methods 
+		// ************************************************************************************************
+
 			private function kevValueFrom(event:Event,key:String):* {
 				return (event && event.hasOwnProperty(key)) ? event[key] : null;
 			}
-		
 		
 		// ************************************************************************************************
 		//  Private Logging features 

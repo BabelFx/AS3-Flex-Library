@@ -14,6 +14,7 @@ package org.babelfx.events
 		public static const INITIALIZED     :String = "initialized";
 		public static const TARGET_READY  	:String = "targetReady";
 		public static const LOCALE_CHANGING	:String = "localeChanging";
+		public static const LOCALE_CHANGED  :String = "localeChanged";
 		
 		/**
 		 * Event to register non-UI instances with LocaleMap... 

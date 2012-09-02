@@ -30,7 +30,7 @@ To use BabelFx v2 and add localication (l10n) support to your application, you m
 <br/>
 To configure Swiz to use BabelFx Localization, simply register the `BabelFxProcess` and the event packages:
 
-
+```mxml
 	<sw:Swiz  xmlns:sw="http://swiz.swizframework.org" >
 		
 		<sw:config>
@@ -49,6 +49,7 @@ To configure Swiz to use BabelFx Localization, simply register the `BabelFxProce
 		</sw:customProcessors>
 		
 	</sw:Swiz>
+```
 
 &nbsp;<br/>
 Note: that your application project **must** include the following compiler argument:
@@ -71,7 +72,7 @@ Non-UIComponent instances must be registered, of course, with Swiz; registration
 To inject localized content into a view, simply use the `[BabelFx( )]` metadata tag:
 <br/>&nbsp;
 
-
+```mxml
 	<?xml version="1.0" encoding="utf-8"?>
 	<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
 			 xmlns:s="library://ns.adobe.com/flex/spark"
@@ -121,10 +122,12 @@ To inject localized content into a view, simply use the `[BabelFx( )]` metadata 
 		</mx:Form>
 	
 	</s:Group>
+```
 
 <br/>
 For non-UIComponents, BabelFx injections are equally as versatile and powerful. Consider the Feedback model class below:
 
+```actionscript
 	package com.companyx.productY.model
 	{
 	    import flash.events.Event;
@@ -224,6 +227,7 @@ For non-UIComponents, BabelFx injections are equally as versatile and powerful. 
 	
 	    }
 	}
+```
 
 ## 1.3 Understanding the [BabelFx(&nbsp;)] Process ##
 
@@ -239,10 +243,11 @@ Using the hidden, registered ResourceInjectors, the BabelFx localization engine 
 
 The `[BabelFx( )]` tag can use the following attributes:
 
+```mxml
 	[BabelFx( property="", key="", parameters="", state="", bundleName="" )]
 	[BabelFx( bundleName="" )]  or [BabelFx( "<bundleName>" )]
 	[BabelFx( event="", handler="" )]
-
+```
 
 ## 1.4 When auto-inject is not enough… ##
 
@@ -251,6 +256,7 @@ Often, more complex logic must be also used to determine how some of the localiz
 
 BabelFx supports this feature using the `[BabelFx( event="" )]` metadata tag. Unlike the other tags (above) which are defined outside the class, this tag is defined adjacent to the public function that should be invoked; used in the same manner as the `[EventHandler( )]` tag.
 
+```actionscript
 		[BabelFx(event="BabelFxEvent.*")]
 		/**
 		 *  Called by BabelFx engine after locale changes and injections into `this` instance have finished.
@@ -261,9 +267,11 @@ BabelFx supports this feature using the `[BabelFx( event="" )]` metadata tag. Un
 			btnCancel.toolTip = model.allowCancel ? '' : resourceManager.getString('header', 'cancelNotAllowedMsg');
 			btnNext.label     = resourceManager.getString('header', 'next').toLocaleUpperCase();
 		}
+```
 
 Developers should note that `[BabelFx( )]` is the same as `[BabelFx(event="BabelFxEvent.*")]`. This notation means that for any event within BabelFx, then the associated function should be called for the following event types:
-	
+
+```actionscript
 		public static const INITIALIZED     :String = "initialized";
 		public static const LOCALE_CHANGING	:String = "localeChanging";
 		public static const LOCALE_CHANGED  :String = "localeChanged";
@@ -271,16 +279,19 @@ Developers should note that `[BabelFx( )]` is the same as `[BabelFx(event="Babel
 		public static const STATE_CHANGED   :String = "stateChanged";
 		public static const TARGET_READY    :String = "creationComplete";
 		public static const PARAMS_CHANGED  :String = "parametersChanged"
+```
 
 If the function handler should only be called during locale changes, then simply define the metadata tag as the following:
 
-		[BabelFx(event="BabelFxEvent.LOCALE_CHANGED")]
-
+```actionscript
+	[BabelFx(event="BabelFxEvent.LOCALE_CHANGED")]
+```
 This extra directive then instructs BabelFx to filter the events and to optimize the function handler invocation for events of only that specific type.
 
 &nbsp;<br/>
 Additionally, developers can use the powerful BabelFxUtils to simplify the above code. 
 
+```actionscript
 	[BabelFx(event = "BabelFxEvent.LOCALE_CHANGED")]
 	public function onLocaleChanged():void 
 	{
@@ -291,7 +302,7 @@ Additionally, developers can use the powerful BabelFxUtils to simplify the above
 		btnCancel.toolTip = model.canContinue ? '' : lookup( 'whyLockedMsg' );
 		btnNext.label     = lookup ( 'next', filter );
 	}
-
+```
 Notice how all references to ResourceManager are removed. The 'lookup` function is essentially a short-cut alias to the ResourceManager.get<XXXX>( ) methods.
 
 &nbsp;<br/>
@@ -301,6 +312,7 @@ Notice how all references to ResourceManager are removed. The 'lookup` function 
 <br/>
 Simply add the `<SwizTraceTarget />` instance to your Swiz setup and insure that the filter includes the BabelFx packages. e.g.
 
+```mxml
 	<sw:Swiz  xmlns:sw="http://swiz.swizframework.org" >
 		
 		<sw:loggingTargets>
@@ -311,9 +323,11 @@ Simply add the `<SwizTraceTarget />` instance to your Swiz setup and insure that
 		</sw:loggingTargets>
 		
 	</sw:Swiz>
+```
 
 When your application starts, the BabelFxProcess will parse all metadata tags, prepare injectors, and the fire the injectors. As BabelFx executes, it will log debug output to the console. Shown below is a sample log output:
 
+```ruby
 	LocaleCommand::loadDefaultLocale( `en_US` )
 	LocalizationMap::fireInjectors( ids=`1,2,3,4,5` )
 
@@ -363,9 +377,7 @@ When your application starts, the BabelFxProcess will parse all metadata tags, p
 		ResourceInjector[7] ::: inject( ui=`com.view.login::LoginPanelLeft` property=`loginButton.label` value=`Log In & Listen` state=`` )
 		ResourceInjector[7] :: [BabelFx( event=`localeChanged` )] on com.view.login::LoginPanelLeft::onLocaleChanged()
 		
-		_
-		
-		
+```				
 
 This log output makes it trivial to identify any [BabelFx()] tags that are incorrect or not working.
 

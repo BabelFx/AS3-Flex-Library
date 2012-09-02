@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<design version="2">
+
+    <namespaces>
+        <namespace prefix="bfx" uri="http://ext.babelfx.org" />
+    </namespaces>
+ 
+    <categories>
+        <category id="BabelFxSwiz" label="BabelFx for Swiz Extensions" defaultExpand="true" />
+    </categories>
+    
+    <components>
+    	<component name="LocalizationMap" displayName="LocalizationMap" namespace="bfx" category="BabelFxSwiz" />
+    </components>
+    
+</design>

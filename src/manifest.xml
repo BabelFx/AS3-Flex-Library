@@ -1,14 +1,9 @@
 <?xml version="1.0"?>
-<componentPackage>    
-	<component class="com.mindspace.l10n.injectors.SmartResourceInjector"/>
-	<component class="com.mindspace.l10n.injectors.ResourceInjector"/>
+<componentPackage>
 
-	<component class="com.mindspace.l10n.proxys.PropertyProxy"/>
-	<component class="com.mindspace.l10n.proxys.ResourceProxy"/>
+    <component id="BabelFxProcessor"	class="ext.swizframework.processors.BabelFxProcessor"/>
+	<component id="LocalizationMap"		class="ext.babelfx.maps.LocalizationMap"/>
+	<component id="ResourceInjector"	class="ext.babelfx.injectors.ResourceInjector"/>
+	<component id="ResourceSetter"		class="ext.babelfx.proxys.ResourceSetter"/>
 
-	<component class="com.mindspace.l10n.maps.LocaleMap"/>
-	<component class="com.mindspace.l10n.commands.ExternalLocaleCommand" />
-	
-	<component class="com.codecatalyst.factory.ClassFactory" />
-	
 </componentPackage>

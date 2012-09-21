@@ -24,6 +24,7 @@ package ext.babelfx.commands
 	
 	public class LocaleCommand implements ILocaleCommand {	
 		
+		
 		[Bindable]
 		/**
 		 *  Logger to be used for debugging purposes
@@ -37,6 +38,13 @@ package ext.babelfx.commands
 		 *  last locale.
 		 */
 		public var lso : ISharedObjectBean;
+		
+
+		[Bindable]
+		/**
+		 *  LSO id used to persist user locale preference. 
+		 */
+		public var lsoKey : String = "userPreferredLocale";
 		
 		
 		[Bindable]
@@ -52,7 +60,7 @@ package ext.babelfx.commands
 		 */
 		public function get userPreferredLocale():String 
 		{
-			return (lso && enableUserPreference) ? lso.getString( KEY_PREFERRED_LOCALE ) : null;
+			return (lso && enableUserPreference) ? lso.getString( LSO_PREFIX + lsoKey ) : null;
 		}
 		public function set userPreferredLocale(val:String):void {
 			if ( !val || val == "") return;
@@ -61,7 +69,7 @@ package ext.babelfx.commands
 			{
 				logger.debug( "LocaleCommand::set userPreferredLocale( `{0}` )", val );
 				
-				lso.setString( KEY_PREFERRED_LOCALE, val );
+				lso.setString( LSO_PREFIX + lsoKey, val );
 			}
 		}
 		
@@ -160,6 +168,6 @@ package ext.babelfx.commands
 		
 		protected var _localeMngr	:IResourceManager = ResourceManager.getInstance();
 		
-		static private const KEY_PREFERRED_LOCALE : String = "userPreferredLocale";
+		protected static const LSO_PREFIX : String = "BabelFx_";
 	}
 }

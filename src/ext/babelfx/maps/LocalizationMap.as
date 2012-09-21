@@ -380,9 +380,13 @@ package ext.babelfx.maps
 			_localeCommand.logger	||= SwizLogger.getLogger( _localeCommand  );
 			
 			_localeCommand.enableUserPreference = enableUserPreference;
+
+			if (event.lsoKey && (event.type == BabelFxEvent.LOAD_DEFAULT)) {
+				// Allow event to override the default LSO persistence ID
+				_localeCommand.lsoKey = event.lsoKey; 
+			}
 			
             _localeCommand.execute(event);
-
         }
 
 

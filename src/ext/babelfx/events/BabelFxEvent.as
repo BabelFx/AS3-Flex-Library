@@ -39,19 +39,23 @@ package ext.babelfx.events
 		public static const PARAMS_CHANGED  :String = "parametersChanged"
 		
 		// Public Properties
-			
 		public var locale 			: String = "";
 		public var resourceManager 	: IResourceManager;
 		
+		// Currently used for LSO key during LOAD_DEFAULT
+		public var lsoKey           : String;
+		
 		// Constructor 
 		
-		public function BabelFxEvent(type:String, locale:String="en_US", resourceManager:IResourceManager=null) 
+		public function BabelFxEvent(type:String, key:String="en_US", resourceManager:IResourceManager=null) 
 		{
 			type ||= LOCALE_CHANGED;
 			
 			super(type,false,false);
 			
-			this.locale 		 = locale;
+			if (type != LOAD_DEFAULT)   this.locale = key;
+			else						this.lsoKey = key;
+			
 			this.resourceManager = resourceManager;
 		}
 		

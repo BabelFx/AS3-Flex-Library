@@ -21,6 +21,8 @@ package ext.babelfx.commands
 		function get lso()   : ISharedObjectBean;
 		function set lso(val : ISharedObjectBean):void;
 		
+		function set lsoKey(val : String):void;
+		
 		function get enableUserPreference()   : Boolean;
 		function set enableUserPreference(val : Boolean):void;
 

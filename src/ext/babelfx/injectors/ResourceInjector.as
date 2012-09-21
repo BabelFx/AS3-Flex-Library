@@ -417,18 +417,18 @@ package ext.babelfx.injectors
 					 var inst : IEventDispatcher = element as IEventDispatcher;
 					 if (inst )
 					 {
-						 var dispatcher : IEventDispatcher = InjectorUtils.scanForTrigger( inst ) || inst as IEventDispatcher;
+						 var dispatcher : IEventDispatcher = InjectorUtils.scanForTrigger( inst );
 						 
-						 if ( active )
+						 if ( dispatcher != null )
 						 {
-							 if ( dispatcher.willTrigger( StateChangeEvent.CURRENT_STATE_CHANGE ) == true) 
+							 if ( active )
 							 {
 								 dispatcher.addEventListener(StateChangeEvent.CURRENT_STATE_CHANGE,onTargetStateChange,false,0,true);
+								 
+							 } else {
+								 
+								 dispatcher.removeEventListener(StateChangeEvent.CURRENT_STATE_CHANGE,onTargetStateChange);
 							 }
-							 
-						 } else {
-							 
-							 dispatcher.removeEventListener(StateChangeEvent.CURRENT_STATE_CHANGE,onTargetStateChange);
 						 }
 					 }
 				}

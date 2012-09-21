@@ -162,6 +162,9 @@ package ext.swizframework.processors
 					setter.filter = expression.eventTypes.length > 1 ? null : expression.eventTypes[ 0 ];
 					setter.eventHandler = btag.host.name || btag.eventHandler;
 					
+					// No filters if all allowed.
+					if (setter.filter == "*") setter.filter = null;
+					
 					injector.proxies = [ setter  ].concat( injector.proxies );
 					
 				} else {

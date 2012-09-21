@@ -1,7 +1,7 @@
 BabelFx (v2.0)
 ====================
 <br/>
-The BabelFx Localization library (version 2.0) has been completely rewritten and is now implemented as an extension(s) to the Swiz v1.4.x IoC framework. As such this version 2.x of BabelFx requires that the Swiz library be included as the core MVC/IoC framework.
+The BabelFx Localization library (version 2.0) has been completely rewritten and is now implemented as an extension(s) to the Swiz v1.x IoC framework. As such this version 2.x of BabelFx requires that the Swiz library be included as the core MVC/IoC framework.
 
 Unlike previous versions, BabelFx v2 no longer uses a proprietary bean-detection engine nor does it require a custom LocaleMap class to be defined and instantiated. In this version of the localization engine/library, developers simply define metadata tags (ala AOP) within any class in which they want l10n injection to occur. Theses metadata tags specify injection directives and can be used to inject localized content into **any** object instance (UIComponent or other non-ui instances). 
 

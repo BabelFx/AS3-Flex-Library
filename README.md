@@ -387,6 +387,8 @@ This log output makes it trivial to identify any [BabelFx()] tags that are incor
 
 ## 1.6 Demo Application ##
 
+![babelfx_landingpage](https://user-images.githubusercontent.com/210413/32693897-9bb09318-c6f8-11e7-8ac3-7bdd5dbcb796.jpg)
+
 <br/>
 The BabelFx sample application [CafeTownsend with Swiz](https://github.com/BabelFx/AS3-Flex-Samples/commit/82287d144eda045c22d57b730ede5dca6c4e3b33) has been updated to use the new BabelFx-for-Swiz library.
 

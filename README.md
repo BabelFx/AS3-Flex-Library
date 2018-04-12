@@ -11,7 +11,8 @@ The BabelFx localization engine does not care about the type of data to be injec
 
 BabelFx only focuses on `where to inject` and `when to inject`! 
 
-![image](http://cdn.babelfx.org/images/mini-features/l10nInjection_v2.png)
+![l10ninjection process](https://user-images.githubusercontent.com/210413/38706877-7e443e6c-3e74-11e8-9465-dfbd832eb99b.png)
+
 
 
 <br/>
